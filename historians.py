@@ -25,7 +25,7 @@ Style.use('fast')
 
 
 # class historian
-class Historian(list):
+class Historian(list, electrons=100):
     """Class Historian to keep track of randomly generated electron histories.
 
      Inherits from:
@@ -43,10 +43,16 @@ class Historian(list):
         """
 
         # set number of electrons
-        self.electrons = 1000
+        self.electrons = electrons
 
         # set number of deflections per trajectory
         self.deflections = 100
+
+        # initialize detector
+        self.bounds = (-20, 20, -20, 20)
+        self.source = (-10, 0)
+        self.divider = 0
+        self.slits = [(2.5, 1.5), (-1.5, -2.5)]
 
         return
 
@@ -64,19 +70,15 @@ class Historian(list):
         """
 
         # generate electrons
-        for trial in range(self.electrons):
+        while len(self) < self.electrons:
 
-            # print status
-            if trial % 100 == 0:
-
-                # print status
-                print('trial {} of {}...'.format(trial, self.electrons))
-
-            # begin history at the origin
-            history = [(0.0, 0.0)]
+            # begin history at the source
+            history = [self.source]
 
             # add points to history
-            for _ in range(self.deflections):
+            live = True
+            keep = False
+            while live:
 
                 # pick angle at random
                 angle = random() * 2 * pi
@@ -89,8 +91,52 @@ class Historian(list):
                 point = (previous[0] + distance * cos(angle), previous[1] + distance * sin(angle))
                 history.append(point)
 
-            # add history to self
-            self.append(history)
+                # check for hitting top
+                if previous[1] < self.bounds[3] < point[1]:
+
+                    # kill it
+                    live = False
+
+                # check for hitting bottom
+                if previous[1] > self.bounds[2] > point[1]:
+
+                    # kill it
+                    live = False
+
+                # check for hitting back
+                if previous[0] > self.bounds[0] > point[0]:
+
+                    # kill it
+                    live = False
+
+                # check for hitting detector
+                if previous[0] < self.bounds[1] < point[0]:
+
+                    # kill it but keep it
+                    live = False
+                    keep = True
+
+                # check for hitting the divider
+                if previous[0] < self.divider < point[0] or previous[0] > self.divider > point[0]:
+
+                    # but not going through the slit
+                    cross = previous[1] * (point[0] - self.divider) + point[1] * (self.divider - previous[0]) / (point[0] - previous[0])
+                    if not (self.slits[0][0] < cross < self.slits[0][1] or self.slits[1][0] < cross < self.slits[1][1]):
+
+                        # kill it
+                        live = False
+
+            # add history to self if keeping
+            if keep:
+
+                # append to self
+                self.append(history)
+
+                # print status
+                if len(self) % 100 == 0:
+
+                    # print status
+                    print('{} electrons'.format(len(self), self.electrons))
 
         return None
 
@@ -146,7 +192,7 @@ class Historian(list):
 
         return guess
 
-    def see(self, number):
+    def see(self, number=1):
         """See a number of paths.
 
         Arguments:
@@ -159,8 +205,20 @@ class Historian(list):
         # begin plot
         pyplot.clf()
 
+        # plot detector
+        left, right, bottom, top = self.bounds
+        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
+
+        # plot slits
+        pyplot.plot([self.divider, self.divider], [top, self.slits[0][0]], 'k-')
+        pyplot.plot([self.divider, self.divider], [bottom, self.slits[1][1]], 'k-')
+        pyplot.plot([self.divider, self.divider], [self.slits[0][1], self.slits[1][0]], 'k-')
+
+        # plot source
+        pyplot.plot(self.source[0], self.source[1], 'yo')
+
         # make colors
-        colors = ['k--', 'r--', 'g--', 'b--', 'c--', 'm--']
+        colors = ['r--', 'g--', 'b--', 'c--', 'm--']
 
         # plot them
         for index, history in enumerate(self[:number]):
@@ -171,7 +229,7 @@ class Historian(list):
             color = colors[index % len(colors)]
 
             # plot
-            pyplot.plot(xs, ys, color)
+            pyplot.plot(xs, ys, color, alpha=0.5)
 
         # save
         pyplot.savefig('history.png')
@@ -180,6 +238,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian()
+historian = Historian(10)
 historian.emit()
-historian.see(1000)
+historian.see(10)
