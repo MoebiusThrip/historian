@@ -45,16 +45,33 @@ class Historian(list):
         # set number of electrons
         self.electrons = electrons
 
-        # set number of deflections per trajectory
-        self.deflections = 100
-
         # initialize detector
         self.bounds = (-20, 20, -20, 20)
         self.source = (-10, 0)
         self.divider = 0
         self.slits = [(-2.5, -1.5), (1.5, 2.5)]
 
+        # set histogram resolution
+        self.resolution = 100
+
         return
+
+    def cross(self, horizontal, point, pointii):
+        """Determine the vertical height at a horizontal between two points.
+
+         Arguments:
+             horizontal: float
+             point: tuple of floats
+             pointii: tuple of floats
+
+        Returns:
+            float
+        """
+
+        # calculate height
+        height = point[1] * (pointii[0] - horizontal) + pointii[1] * (horizontal - point[0]) / (pointii[0] - point[0])
+
+        return height
 
     def emit(self):
         """Emit electrons from the cathode towards to detector.
@@ -92,39 +109,39 @@ class Historian(list):
                 history.append(point)
 
                 # check for hitting top
-                if previous[1] < self.bounds[3] < point[1]:
+                if previous[1] <= self.bounds[3] <= point[1]:
 
                     # kill it
                     live = False
 
                 # check for hitting bottom
-                if point[1] < self.bounds[2] < previous[1]:
+                if point[1] <= self.bounds[2] <= previous[1]:
 
                     # kill it
                     live = False
 
                 # check for hitting back
-                if point[0] < self.bounds[0] < previous[0]:
+                if point[0] <= self.bounds[0] <= previous[0]:
 
                     # kill it
                     live = False
 
                 # check for hitting detector
-                if previous[0] < self.bounds[1] < point[0]:
+                if previous[0] <= self.bounds[1] <= point[0]:
 
                     # kill it but keep it
                     live = False
                     keep = True
 
                 # check for hitting the divider
-                if previous[0] < self.divider < point[0] or point[0] < self.divider < previous[0]:
+                if previous[0] <= self.divider <= point[0] or point[0] <= self.divider <= previous[0]:
 
                     # kill it
                     live = False
 
                     # unless it went through the slit
-                    cross = previous[1] * (point[0] - self.divider) + point[1] * (self.divider - previous[0]) / (point[0] - previous[0])
-                    if self.slits[0][0] < cross < self.slits[0][1] or self.slits[1][0] < cross < self.slits[1][1]:
+                    cross = self.cross(self.divider, previous, point)
+                    if self.slits[0][0] <= cross <= self.slits[0][1] or self.slits[1][0] <= cross <= self.slits[1][1]:
 
                         # ressurect it
                         live = True
@@ -170,8 +187,8 @@ class Historian(list):
         number = random()
 
         # define the function to zero, and its derivative
-        zero = lambda x: pi * x - sin(pi * x) - 2 * pi * number
-        slope = lambda x: pi - pi * cos(pi * x)
+        zero = lambda x: x - number - 0.5 + sin(2 * pi * x) / (2 * pi)
+        slope = lambda x: 1 + cos(2 * pi * x)
 
         # define the tolerance
         tolerance = 1e-12
@@ -195,21 +212,18 @@ class Historian(list):
 
         return guess
 
-    def see(self, number=None):
+    def see(self, number=1000):
         """See a number of paths.
 
         Arguments:
-            number: int, number of histories
+            number: int, max number of histories to plot
 
         Returns:
             None
         """
 
-        # default number to len
-        if not number:
-
-            # default to len
-            number = len(self)
+        # default number to total length
+        number = min([number, len(self)])
 
         # begin plot
         pyplot.clf()
@@ -227,26 +241,50 @@ class Historian(list):
         colors = ['r-', 'b-', 'c-', 'm-']
 
         # plot them
-        for index, history in enumerate(self[:number]):
+        for index, history in enumerate(self[-number:]):
 
             # get coordinates
             xs = numpy.array([point[0] for point in history])
             ys = numpy.array([point[1] for point in history])
             color = colors[index % len(colors)]
 
-            # set alpha
-            alpha = 0.01 + 0.1 * int(index > len(self) - 9) + 0.1 * int(index > len(self) - 6) + 0.1 * int(index > len(self) - 4) + 0.1 * int(index > len(self) - 3) + 0.1 * int(index > len(self) - 2)
+            # set opacity
+            opacity = 0.01
+            for fibonacci in (2, 3, 5, 8, 13):
+
+                # add factor
+                opacity += 0.1 * int(index >= number - fibonacci)
 
             # plot
-            pyplot.plot(xs, ys, color, alpha=alpha)
+            pyplot.plot(xs, ys, color, alpha=opacity)
 
         # plot source
-        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
-        #pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
-        pyplot.plot(self.source[0], self.source[1], 'go', markersize=13)
-        #pyplot.plot(self.source[0], self.source[1], 'co', markersize=10)
-        #pyplot.plot(self.source[0], self.source[1], 'mo', markersize=7)
+        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=12)
+        pyplot.plot(self.source[0], self.source[1], 'go', markersize=9)
         pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
+
+        # plot histogram
+        chunk = (self.bounds[3] - self.bounds[2]) / self.resolution
+        bins = [(self.bounds[2] + index * chunk, self.bounds[2] + (index + 1) * chunk) for index in range(self.resolution)]
+
+        # populate bins
+        population = [len([member for member in self if bin[0] < self.cross(self.bounds[1], member[0], member[1]) < bin[1]]) for bin in bins]
+
+        # normalize population
+        maximum = max(population)
+        population = [entry * 10 / maximum for entry in population]
+
+        # plot it
+        for bin, quantity in zip(bins, population):
+
+            # plot the height
+            middle = (bin[0] + bin[1]) / 2
+            pyplot.plot([self.bounds[1] + 1, self.bounds[1] + 1 + quantity], [middle, middle], 'g-', linewidth=3)
+            pyplot.plot([self.bounds[1] + 1, self.bounds[1] + 1 + quantity], [middle, middle], 'y-', linewidth=1)
+
+        # remove ticks
+        pyplot.gca().set_xticks([])
+        pyplot.gca().set_yticks([])
 
         # save
         pyplot.savefig('history.png')
@@ -255,6 +293,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(1000)
+historian = Historian(10000)
 historian.emit()
 historian.see()
