@@ -223,16 +223,8 @@ class Historian(list):
         pyplot.plot([self.divider, self.divider], [self.slits[0][1], self.slits[1][0]], 'k-')
         pyplot.plot([self.divider, self.divider], [self.slits[1][1], top], 'k-')
 
-        # plot source
-        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=19)
-        #pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
-        pyplot.plot(self.source[0], self.source[1], 'go', markersize=13)
-        #pyplot.plot(self.source[0], self.source[1], 'co', markersize=10)
-        #pyplot.plot(self.source[0], self.source[1], 'mo', markersize=7)
-        pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
-
         # make colors
-        colors = ['r-', 'g-', 'b-', 'c-', 'm-']
+        colors = ['r-', 'b-', 'c-', 'm-']
 
         # plot them
         for index, history in enumerate(self[:number]):
@@ -243,10 +235,18 @@ class Historian(list):
             color = colors[index % len(colors)]
 
             # set alpha
-            alpha = 0.01 + 0.1 * int(index < 8) + 0.1 * int(index < 5) + 0.1 * int(index < 3) + 0.1 * int(index < 2) + 0.1 * int(index < 1)
+            alpha = 0.01 + 0.1 * int(index > len(self) - 9) + 0.1 * int(index > len(self) - 6) + 0.1 * int(index > len(self) - 4) + 0.1 * int(index > len(self) - 3) + 0.1 * int(index > len(self) - 2)
 
             # plot
             pyplot.plot(xs, ys, color, alpha=alpha)
+
+        # plot source
+        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
+        #pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
+        pyplot.plot(self.source[0], self.source[1], 'go', markersize=13)
+        #pyplot.plot(self.source[0], self.source[1], 'co', markersize=10)
+        #pyplot.plot(self.source[0], self.source[1], 'mo', markersize=7)
+        pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
 
         # save
         pyplot.savefig('history.png')
@@ -255,6 +255,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(500)
+historian = Historian(1000)
 historian.emit()
 historian.see()
