@@ -32,11 +32,13 @@ class Historian(list):
         list
     """
 
-    def __init__(self, electrons=100):
+    def __init__(self, electrons=100, status=True, statusii=True):
         """Initialize a historian instance.
 
         Arguments:
-            None
+            electrons: int, number of successful electrons
+            status: boolean, first slit open?
+            statusii: boolean, second slit open?
 
         Returns:
             None
@@ -45,16 +47,92 @@ class Historian(list):
         # set number of electrons
         self.electrons = electrons
 
-        # initialize detector
-        self.bounds = (-20, 20, -20, 20)
-        self.source = (-10, 0)
+        # set up apparatus
+        self.top = 20
+        self.bottom = -20
+        self.back = -20
         self.divider = 0
-        self.slits = [(-2.5, -1.5), (1.5, 2.5)]
+        self.screen = 20
+        self.source = (-10, 0)
+
+        # configure slits
+        self.gap = 1
+        self.space = 3
+        self.statuses = [status, statusii]
+        self.slits = []
+        self._configure()
 
         # set histogram resolution
         self.resolution = 100
 
+        # define probability distribution functions
+        self.distribution = lambda x:  2 * cos(pi * x) ** 2
+        self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
+
         return
+
+    def _configure(self):
+        """Configure the slits based on gap size and space between.
+
+        Arguments:
+             None
+
+        Returns:
+            None
+
+        Populates:
+            self.slits
+        """
+
+        # establish first slit location
+        top = self.gap + self.space / 2
+        bottom = self.space / 2
+
+        # establish second slit location
+        topii = -self.space / 2
+        bottomii = -self.space / 2 - self.gap
+
+        # set slits
+        self.slits = [(top, bottom), (topii, bottomii)]
+
+        return None
+
+    def _dump(self, contents, deposit):
+        """Dump a dictionary into a json file.
+
+        Arguments:
+            contents: dict
+            deposit: str, deposit file path
+
+        Returns:
+            None
+        """
+
+        # dump file
+        with open(deposit, 'w') as pointer:
+
+            # dump contents
+            json.dump(contents, pointer)
+
+        return None
+
+    def _load(self, path):
+        """Load a json file.
+
+        Arguments:
+            path: str, file path
+
+        Returns:
+            dict
+        """
+
+        # open json file
+        with open(path, 'r') as pointer:
+
+            # get contents
+            contents = json.load(pointer)
+
+        return contents
 
     def cross(self, horizontal, point, pointii):
         """Determine the vertical height at a horizontal between two points.
@@ -72,6 +150,36 @@ class Historian(list):
         height = point[1] * (pointii[0] - horizontal) + pointii[1] * (horizontal - point[0]) / (pointii[0] - point[0])
 
         return height
+
+    def distribute(self):
+        """Plot the distribution functions.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # get horizontal points
+        chunk = 0.01
+        horizontals = [number * chunk + 0.5 for number in range(101)]
+
+        # calculate functions
+        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
+        quantiles = numpy.array([self.quantile(horizontal) for horizontal in horizontals])
+
+        # set up plot
+        pyplot.clf()
+
+        # plot functions
+        pyplot.plot(horizontals, distributions, 'b--')
+        pyplot.plot(horizontals, quantiles, 'g--')
+
+        # save figure
+        pyplot.savefig('distribution.png')
+
+        return None
 
     def emit(self):
         """Emit electrons from the cathode towards to detector.
@@ -293,6 +401,7 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(10000)
-historian.emit()
-historian.see()
+historian = Historian(100)
+historian.distribute()
+# historian.emit()
+# historian.see()
