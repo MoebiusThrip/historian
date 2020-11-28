@@ -255,6 +255,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(200)
+historian = Historian(500)
 historian.emit()
 historian.see()
