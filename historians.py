@@ -242,8 +242,11 @@ class Historian(list):
             ys = numpy.array([point[1] for point in history])
             color = colors[index % len(colors)]
 
+            # set alpha
+            alpha = 0.01 + 0.1 * int(index < 8) + 0.1 * int(index < 5) + 0.1 * int(index < 3) + 0.1 * int(index < 2) + 0.1 * int(index < 1)
+
             # plot
-            pyplot.plot(xs, ys, color, alpha=0.01)
+            pyplot.plot(xs, ys, color, alpha=alpha)
 
         # save
         pyplot.savefig('history.png')
@@ -252,6 +255,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(500)
+historian = Historian(200)
 historian.emit()
 historian.see()
