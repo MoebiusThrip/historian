@@ -25,14 +25,14 @@ Style.use('fast')
 
 
 # class historian
-class Historian(list, electrons=100):
+class Historian(list):
     """Class Historian to keep track of randomly generated electron histories.
 
      Inherits from:
         list
     """
 
-    def __init__(self):
+    def __init__(self, electrons=100):
         """Initialize a historian instance.
 
         Arguments:
@@ -49,10 +49,10 @@ class Historian(list, electrons=100):
         self.deflections = 100
 
         # initialize detector
-        self.bounds = (-20, 20, -20, 20)
-        self.source = (-10, 0)
+        self.bounds = (-5, 5, -5, 5)
+        self.source = (-2.5, 0)
         self.divider = 0
-        self.slits = [(2.5, 1.5), (-1.5, -2.5)]
+        self.slits = [(4.5, 1.5), (-1.5, -4.5)]
 
         return
 
@@ -117,26 +117,29 @@ class Historian(list, electrons=100):
                     keep = True
 
                 # check for hitting the divider
-                if previous[0] < self.divider < point[0] or previous[0] > self.divider > point[0]:
+                if previous[0] < self.divider < point[0] or point[0] < self.divider < previous[0]:
 
-                    # but not going through the slit
+                    # kill it
+                    live = False
+
+                    # unless it went through the slit
                     cross = previous[1] * (point[0] - self.divider) + point[1] * (self.divider - previous[0]) / (point[0] - previous[0])
-                    if not (self.slits[0][0] < cross < self.slits[0][1] or self.slits[1][0] < cross < self.slits[1][1]):
+                    if self.slits[0][0] < cross < self.slits[0][1] or self.slits[1][0] < cross < self.slits[1][1]:
 
-                        # kill it
-                        live = False
+                        # ressurect it
+                        live = True
 
-            # add history to self if keeping
-            if keep:
+            # # add history to self if keeping
+            # if keep:
 
-                # append to self
-                self.append(history)
+            # append to self
+            self.append(history)
+
+            # print status
+            if len(self) % 100 == 0:
 
                 # print status
-                if len(self) % 100 == 0:
-
-                    # print status
-                    print('{} electrons'.format(len(self), self.electrons))
+                print('{} electrons'.format(len(self), self.electrons))
 
         return None
 
@@ -238,6 +241,6 @@ class Historian(list, electrons=100):
 
 
 # create instance
-historian = Historian(10)
+historian = Historian(100)
 historian.emit()
-historian.see(10)
+historian.see(100)
