@@ -52,7 +52,7 @@ class Historian(list):
         self.bounds = (-5, 5, -5, 5)
         self.source = (-2.5, 0)
         self.divider = 0
-        self.slits = [(4.5, 1.5), (-1.5, -4.5)]
+        self.slits = [(-4.5, -1.5), (1.5, 4.5)]
 
         return
 
@@ -98,13 +98,13 @@ class Historian(list):
                     live = False
 
                 # check for hitting bottom
-                if previous[1] > self.bounds[2] > point[1]:
+                if point[1] < self.bounds[2] < previous[1]:
 
                     # kill it
                     live = False
 
                 # check for hitting back
-                if previous[0] > self.bounds[0] > point[0]:
+                if point[0] < self.bounds[0] < previous[0]:
 
                     # kill it
                     live = False
@@ -129,17 +129,17 @@ class Historian(list):
                         # ressurect it
                         live = True
 
-            # # add history to self if keeping
-            # if keep:
+            # add history to self if keeping
+            if keep:
 
-            # append to self
-            self.append(history)
-
-            # print status
-            if len(self) % 100 == 0:
+                # append to self
+                self.append(history)
 
                 # print status
-                print('{} electrons'.format(len(self), self.electrons))
+                if len(self) % 100 == 0:
+
+                    # print status
+                    print('{} electrons'.format(len(self), self.electrons))
 
         return None
 
@@ -213,9 +213,9 @@ class Historian(list):
         pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
 
         # plot slits
-        pyplot.plot([self.divider, self.divider], [top, self.slits[0][0]], 'k-')
-        pyplot.plot([self.divider, self.divider], [bottom, self.slits[1][1]], 'k-')
+        pyplot.plot([self.divider, self.divider], [bottom, self.slits[0][0]], 'k-')
         pyplot.plot([self.divider, self.divider], [self.slits[0][1], self.slits[1][0]], 'k-')
+        pyplot.plot([self.divider, self.divider], [self.slits[1][1], top], 'k-')
 
         # plot source
         pyplot.plot(self.source[0], self.source[1], 'yo')
@@ -241,6 +241,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(100)
+historian = Historian(10)
 historian.emit()
-historian.see(100)
+historian.see(10)
