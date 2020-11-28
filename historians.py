@@ -49,10 +49,10 @@ class Historian(list):
         self.deflections = 100
 
         # initialize detector
-        self.bounds = (-5, 5, -5, 5)
-        self.source = (-2.5, 0)
+        self.bounds = (-20, 20, -20, 20)
+        self.source = (-10, 0)
         self.divider = 0
-        self.slits = [(-4.5, -1.5), (1.5, 4.5)]
+        self.slits = [(-2.5, -1.5), (1.5, 2.5)]
 
         return
 
@@ -136,7 +136,7 @@ class Historian(list):
                 self.append(history)
 
                 # print status
-                if len(self) % 100 == 0:
+                if len(self) % 10 == 0:
 
                     # print status
                     print('{} electrons'.format(len(self), self.electrons))
@@ -195,7 +195,7 @@ class Historian(list):
 
         return guess
 
-    def see(self, number=1):
+    def see(self, number=None):
         """See a number of paths.
 
         Arguments:
@@ -204,6 +204,12 @@ class Historian(list):
         Returns:
             None
         """
+
+        # default number to len
+        if not number:
+
+            # default to len
+            number = len(self)
 
         # begin plot
         pyplot.clf()
@@ -218,10 +224,15 @@ class Historian(list):
         pyplot.plot([self.divider, self.divider], [self.slits[1][1], top], 'k-')
 
         # plot source
-        pyplot.plot(self.source[0], self.source[1], 'yo')
+        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=19)
+        #pyplot.plot(self.source[0], self.source[1], 'yo', markersize=16)
+        pyplot.plot(self.source[0], self.source[1], 'go', markersize=13)
+        #pyplot.plot(self.source[0], self.source[1], 'co', markersize=10)
+        #pyplot.plot(self.source[0], self.source[1], 'mo', markersize=7)
+        pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
 
         # make colors
-        colors = ['r--', 'g--', 'b--', 'c--', 'm--']
+        colors = ['r-', 'g-', 'b-', 'c-', 'm-']
 
         # plot them
         for index, history in enumerate(self[:number]):
@@ -232,7 +243,7 @@ class Historian(list):
             color = colors[index % len(colors)]
 
             # plot
-            pyplot.plot(xs, ys, color, alpha=0.5)
+            pyplot.plot(xs, ys, color, alpha=0.01)
 
         # save
         pyplot.savefig('history.png')
@@ -241,6 +252,6 @@ class Historian(list):
 
 
 # create instance
-historian = Historian(10)
+historian = Historian(500)
 historian.emit()
-historian.see(10)
+historian.see()
