@@ -69,7 +69,37 @@ class Historian(list):
         self.distribution = lambda x:  2 * cos(pi * x) ** 2
         self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
 
+        # prepare functions for newton-rhapson
+        self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
+        self.slope = lambda x, q: 1 + cos(2 * pi * x)
+
         return
+
+    def _bin(self, data, start, finish, resolution):
+        """Bin the data from start to finish into a number of bins according to resolution.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # create bins
+        width = (finish - start) / resolution
+        bins = [(start + index * width, start + (index + 1) * width) for index in range(resolution)]
+
+        # get middle points
+        middles = [(bin[0] + bin[1]) / 2 for bin in bins]
+
+        # get counts
+        counts = [len([datum for datum in data if bin[0] <= datum < bin[1]]) for bin in bins]
+
+        # adjust heights based on area
+        area = sum(counts) * width
+        heights = [count / area for count in counts]
+
+        return middles, heights
 
     def _configure(self):
         """Configure the slits based on gap size and space between.
@@ -96,6 +126,34 @@ class Historian(list):
         self.slits = [(top, bottom), (topii, bottomii)]
 
         return None
+
+    def _crank(self, quantile, guess=1.0, tolerance=1e-12):
+        """Crank through Newton Rhapson to solve the quantile equation for a segment length.
+
+        Arguments:
+            quantile: float, the quantile to pinpoint
+            guess=1.0: float, initial guess
+            tolerance=1e-12: tolerance for closesness to zero
+
+        Returns:
+            float, better guess for segment length
+        """
+
+        # evaluate the function
+        evaluation = self.zero(guess, quantile)
+        derivative = self.slope(guess, quantile)
+
+        # while the function evaluates to outside the tolerance
+        while abs(evaluation) > tolerance:
+
+            # adjust using newton's formula
+            guess = guess - evaluation / derivative
+
+            # evaluate the function
+            evaluation = self.zero(guess, quantile)
+            derivative = self.slope(guess, quantile)
+
+        return guess
 
     def _dump(self, contents, deposit):
         """Dump a dictionary into a json file.
@@ -399,9 +457,46 @@ class Historian(list):
 
         return
 
+    def verify(self, trials=10000):
+        """Test the distribution resulting from the inverse quantile function.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # find all lengths based on random number selection
+        lengths = [self._crank(random()) for _ in range(trials)]
+
+        # bin them to draw a histogram
+        middles, heights = self._bin(lengths, resolution=100, start=0.5, finish=1.5)
+
+        # calculate distribution function
+        chunk = 0.01
+        horizontals = [number * chunk + 0.5 for number in range(101)]
+        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
+
+        # start plot
+        pyplot.clf()
+
+        # plot bars
+        for middle, height in zip(middles, heights):
+
+            # plot a bar
+            pyplot.plot([middle, middle], [0, height], 'g-', linewidth=1)
+
+        # plot distribution
+        pyplot.plot(horizontals, distributions, 'b--')
+
+        # save fig
+        pyplot.savefig('verification.png')
+
+        return None
 
 # create instance
 historian = Historian(100)
-historian.distribute()
+historian.verify()
 # historian.emit()
 # historian.see()
