@@ -7,6 +7,9 @@ from importlib import reload
 import os, sys
 import json
 
+# import time
+from time import time
+
 # import random
 from random import random
 
@@ -257,10 +260,13 @@ class Historian(list):
         table = self._load('table.json')
 
         # generate electrons
+        count = 0
+        start = time()
         while len(self) < self.electrons:
 
             # begin history at the source
             history = [self.source]
+            count += 1
 
             # random walk until it hits something
             live = True
@@ -329,12 +335,124 @@ class Historian(list):
                     # print status
                     print('{} electrons'.format(len(self), self.electrons))
 
+        # summarize run
+        final = time()
+        percent = round(100 * count / self.electrons, 2)
+        duration = round((final - initial) / 60, 2)
+        rate = round(self.electrons / self.duration, 0)
+
+        # print results
+        print('{} successful detections out of {} total, or {}%'.format(self.electrons, count, percent))
+        print('took {} minutes, or {} electrons / minute'.format(duration, rate))
+
         # save the histories
         self._dump(self, 'histories.json')
 
         return None
 
-    def see(self, number=1000):
+    def populate(self):
+        """Populate with saved histories rather than generating new ones.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+
+        Populates:
+            self
+        """
+
+        # depopulate
+        while len(self) > 1:
+
+            # discard
+            discard = self.pop()
+
+        # open up histories
+        histories = self._load('histories.json')
+
+        # repopulate
+        [self.append(history) for history in histories]
+
+        return None
+
+    def tabulate(self, precision=3, tolerance=1e-14):
+        """Tabulate values of the quantile integral to be looked up during random walk generation.
+
+        Arguments:
+            precision=3: int, precision of table
+            tolerance=1e-16: float, tolerance for newton-rhapson convergence
+
+        Returns:
+            None
+        """
+
+        # generate all quantiles
+        quantiles = [float(number) / 10 ** precision for number in range(10 ** precision + 1)]
+
+        # generate all lengths
+        lengths = []
+        for index, quantile in enumerate(quantiles):
+
+            # print status
+            if index % 10 == 0:
+
+                # print status
+                print('calculating quantile {} of {}'.format(index, len(quantiles)))
+
+            # calculate length and make a string
+            length = self._crank(quantile, guess=1.0, tolerance=tolerance)
+            lengths.append(length)
+
+        # create table from rounded quantile strings
+        table = {str(round(quantile, precision)): length for quantile, length in zip(quantiles, lengths)}
+        self._dump(table, 'table.json')
+
+        return None
+
+    def verify(self, trials=10000):
+        """Test the distribution resulting from the inverse quantile function and lookup table.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # load in table
+        table = self._load('table.json')
+
+        # find all lengths based on random number selection
+        lengths = [table[str(round(random(), 3))] for _ in range(trials)]
+
+        # bin them to draw a histogram
+        middles, heights = self._bin(lengths, resolution=100, start=0.5, finish=1.5)
+
+        # calculate distribution function
+        chunk = 0.01
+        horizontals = [number * chunk + 0.5 for number in range(101)]
+        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
+
+        # start plot
+        pyplot.clf()
+
+        # plot bars
+        for middle, height in zip(middles, heights):
+
+            # plot a bar
+            pyplot.plot([middle, middle], [0, height], 'g-', linewidth=1)
+
+        # plot distribution
+        pyplot.plot(horizontals, distributions, 'b--')
+
+        # save fig
+        pyplot.savefig('verification.png')
+
+        return None
+
+    def view(self, number=1000):
         """See a number of paths.
 
         Arguments:
@@ -412,81 +530,6 @@ class Historian(list):
         pyplot.savefig('histories.png')
 
         return
-
-    def tabulate(self, precision=3, tolerance=1e-14):
-        """Tabulate values of the quantile integral to be looked up during random walk generation.
-
-        Arguments:
-            precision=3: int, precision of table
-            tolerance=1e-16: float, tolerance for newton-rhapson convergence
-
-        Returns:
-            None
-        """
-
-        # generate all quantiles
-        quantiles = [float(number) / 10 ** precision for number in range(10 ** precision + 1)]
-
-        # generate all lengths
-        lengths = []
-        for index, quantile in enumerate(quantiles):
-
-            # print status
-            if index % 10 == 0:
-
-                # print status
-                print('calculating quantile {} of {}'.format(index, len(quantiles)))
-
-            # calculate length and make a string
-            length = self._crank(quantile, guess=1.0, tolerance=tolerance)
-            lengths.append(length)
-
-        # create table from rounded quantile strings
-        table = {str(round(quantile, precision)): length for quantile, length in zip(quantiles, lengths)}
-        self._dump(table, 'table.json')
-
-        return None
-
-    def verify(self, trials=10000):
-        """Test the distribution resulting from the inverse quantile function and lookup table.
-
-        Arguments:
-            None
-
-        Returns:
-            None
-        """
-
-        # load in table
-        table = self._load('table.json')
-
-        # find all lengths based on random number selection
-        lengths = [table[str(round(random(), 3))] for _ in range(trials)]
-
-        # bin them to draw a histogram
-        middles, heights = self._bin(lengths, resolution=100, start=0.5, finish=1.5)
-
-        # calculate distribution function
-        chunk = 0.01
-        horizontals = [number * chunk + 0.5 for number in range(101)]
-        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
-
-        # start plot
-        pyplot.clf()
-
-        # plot bars
-        for middle, height in zip(middles, heights):
-
-            # plot a bar
-            pyplot.plot([middle, middle], [0, height], 'g-', linewidth=1)
-
-        # plot distribution
-        pyplot.plot(horizontals, distributions, 'b--')
-
-        # save fig
-        pyplot.savefig('verification.png')
-
-        return None
 
 # create instance
 historian = Historian(100)
