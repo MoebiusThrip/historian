@@ -124,7 +124,7 @@ class Historian(list):
         top = self.top
         bottom = self.bottom
         divider = self.divider
-        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
+        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-', linewidth=3)
 
         # plot slits
         pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'k-', linewidth=3)
@@ -132,7 +132,7 @@ class Historian(list):
         pyplot.plot([divider, divider], [self.slits[0][0], top], 'k-', linewidth=3)
 
         # add light to screen
-        pyplot.plot([right, right], [top, bottom], 'g-', linewidth=3)
+        pyplot.plot([right, right], [top, bottom], 'g-', linewidth=2)
 
         return None
 
@@ -591,7 +591,7 @@ class Historian(list):
 
         # set trajectory colors
         colors = ['r-', 'b-', 'c-', 'm-']
-        highlights = ['w-']
+        highlights = ['g-']
 
         # create trajectories for the subset
         trajectories = []
@@ -659,7 +659,7 @@ class Historian(list):
 
 # create instance
 historian = Historian(500)
-historian.emit()
+#historian.emit()
 print('loading...')
 historian.populate()
 print('drawing...')
