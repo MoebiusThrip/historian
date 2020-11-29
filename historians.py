@@ -219,7 +219,7 @@ class Historian(list):
         """
 
         # dump file
-        print('dumping into {}'.format(deposit))
+        print('dumping into {}...'.format(deposit))
         with open(deposit, 'w') as pointer:
 
             # dump contents
