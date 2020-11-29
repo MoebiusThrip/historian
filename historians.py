@@ -14,7 +14,7 @@ from time import time
 from numpy.random import random
 
 # import trig functions
-from math import sin, cos, pi
+from math import sin, cos, pi, exp, log
 
 # import numpy
 import numpy
@@ -67,7 +67,7 @@ class Historian(list):
         self._configure()
 
         # set histogram resolution
-        self.resolution = 100
+        self.resolution = 1000
 
         # set tabulation precision
         self.precision = 3
@@ -107,6 +107,34 @@ class Historian(list):
         heights = [count / area for count in counts]
 
         return middles, heights
+
+    def _build(self):
+        """Plot the detector apparatus in the plot.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # plot detector
+        left = self.back
+        right = self.screen
+        top = self.top
+        bottom = self.bottom
+        divider = self.divider
+        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
+
+        # plot slits
+        pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'k-', linewidth=3)
+        pyplot.plot([divider, divider], [self.slits[0][1], self.slits[1][0]], 'k-', linewidth=3)
+        pyplot.plot([divider, divider], [self.slits[0][0], top], 'k-', linewidth=3)
+
+        # add light to screen
+        pyplot.plot([right, right], [top, bottom], 'g-', linewidth=3)
+
+        return None
 
     def _configure(self):
         """Configure the slits based on gap size and space between.
@@ -198,6 +226,54 @@ class Historian(list):
 
         return None
 
+    def _graph(self):
+        """Plot the histograph.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # plot histogram
+        chunk = (self.top - self.bottom) / self.resolution
+        bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
+
+        # populate bins
+        population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
+
+        # normalize population
+        maximum = max(population)
+        population = [entry * 10 / maximum for entry in population]
+
+        # plot it
+        for bin, quantity in zip(bins, population):
+
+            # plot the height
+            middle = (bin[0] + bin[1]) / 2
+            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=1)
+            #pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
+
+        return None
+
+    def _ignite(self):
+        """Plot the source.
+
+        Arguments:
+            None
+
+        Returns:
+            None
+        """
+
+        # plot source
+        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=12)
+        pyplot.plot(self.source[0], self.source[1], 'go', markersize=9)
+        pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
+
+        return None
+
     def _load(self, path):
         """Load a json file.
 
@@ -215,6 +291,28 @@ class Historian(list):
             contents = json.load(pointer)
 
         return contents
+
+    def _trace(self, trajectories):
+        """Trace trajectories on the plot.
+
+        Arguments:
+            trajectories: tuples
+
+        Returns:
+            None
+        """
+
+        # plot the trajectories
+        for history, color, opacity in trajectories:
+
+            # get horizontals and verticals
+            horizontals = numpy.array([point[0] for point in history])
+            verticals = numpy.array([point[1] for point in history])
+
+            # plot
+            pyplot.plot(horizontals, verticals, color, alpha=opacity)
+
+        return None
 
     def distribute(self):
         """Plot the distribution functions.
@@ -340,6 +438,12 @@ class Historian(list):
 
                 # append to self
                 self.append(history)
+
+                # safe
+                if len(self) % 1000 == 0:
+
+                    # save
+                    self._dump(self, 'histories.json')
 
                 # print status
                 if len(self) % 10 == 0:
@@ -470,7 +574,7 @@ class Historian(list):
         return None
 
     def view(self, number=1000):
-        """View a number of paths.
+        """View the histories.
 
         Arguments:
             number: int, max number of histories to plot
@@ -479,69 +583,70 @@ class Historian(list):
             None
         """
 
-        # default number to total length
-        number = min([number, len(self)])
-
         # begin plot
         pyplot.clf()
 
-        # plot detector
-        left = self.back
-        right = self.screen
-        top = self.top
-        bottom = self.bottom
-        divider = self.divider
-        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
+        # plot the histograph
+        self._graph()
 
-        # plot slits
-        pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'k-')
-        pyplot.plot([divider, divider], [self.slits[0][1], self.slits[1][0]], 'k-')
-        pyplot.plot([divider, divider], [self.slits[0][0], top], 'k-')
-
-        # make colors
+        # set trajectory colors
         colors = ['r-', 'b-', 'c-', 'm-']
+        highlights = ['w-']
 
-        # plot them
-        for index, history in enumerate(self[-number:]):
+        # create trajectories for the subset
+        trajectories = []
+        for index, history in enumerate(self[:number]):
 
-            # get coordinates
-            xs = numpy.array([point[0] for point in history])
-            ys = numpy.array([point[1] for point in history])
-            color = colors[index % len(colors)]
+            # use rotating colors for the majority
+            color = colors[index % 4]
+            if index < 1:
 
-            # set opacity
-            opacity = 0.01
-            for fibonacci in (2, 3, 5, 8, 13):
+                # but highlights for the first few
+                color = highlights[index]
 
-                # add factor
-                opacity += 0.1 * int(index >= number - fibonacci)
+            # use an exponential for quickly decaying opacity
+            opacity = min([1.0, exp(-0.3 * index) + 0.01])
 
-            # plot
-            pyplot.plot(xs, ys, color, alpha=opacity)
+            # add to the trajectory
+            trajectory = (history, color, opacity)
+            trajectories.append(trajectory)
 
-        # plot source
-        pyplot.plot(self.source[0], self.source[1], 'yo', markersize=12)
-        pyplot.plot(self.source[0], self.source[1], 'go', markersize=9)
-        pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
+        # reverse the trajectories to plot highlights last
+        trajectories.reverse()
 
-        # plot histogram
-        chunk = (self.top - self.bottom) / self.resolution
-        bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
+        # trace the majority of trajectories
+        self._trace(trajectories[:-20])
 
-        # populate bins
-        population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
+        # build the apparatus
+        self._build()
 
-        # normalize population
-        maximum = max(population)
-        population = [entry * 10 / maximum for entry in population]
+        # trace most of the remaining trajectories
+        self._trace(trajectories[-20:-1])
 
-        # plot it
-        for bin, quantity in zip(bins, population):
+        # ignite the source
+        self._ignite()
 
-            # plot the height
-            middle = (bin[0] + bin[1]) / 2
-            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=3)
-            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
+        # trace the remainder
+        self._trace(trajectories[-1:])
+
+        # # plot histogram
+        # chunk = (self.top - self.bottom) / self.resolution
+        # bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
+        #
+        # # populate bins
+        # population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
+        #
+        # # normalize population
+        # maximum = max(population)
+        # population = [entry * 10 / maximum for entry in population]
+        #
+        # # plot it
+        # for bin, quantity in zip(bins, population):
+        #
+        #     # plot the height
+        #     middle = (bin[0] + bin[1]) / 2
+        #     pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=3)
+        #     pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
 
         # remove ticks
         pyplot.gca().set_xticks([])
@@ -553,7 +658,9 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(50000)
+historian = Historian(500)
 historian.emit()
+print('loading...')
 historian.populate()
+print('drawing...')
 historian.view()
