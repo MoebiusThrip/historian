@@ -156,6 +156,23 @@ class Historian(list):
 
         return guess
 
+    def _cross(self, horizontal, point, pointii):
+        """Determine the vertical height at a horizontal between two points.
+
+         Arguments:
+             horizontal: float
+             point: tuple of floats
+             pointii: tuple of floats
+
+        Returns:
+            float
+        """
+
+        # calculate height
+        height = point[1] * (pointii[0] - horizontal) + pointii[1] * (horizontal - point[0]) / (pointii[0] - point[0])
+
+        return height
+
     def _dump(self, contents, deposit):
         """Dump a dictionary into a json file.
 
@@ -193,23 +210,6 @@ class Historian(list):
 
         return contents
 
-    def cross(self, horizontal, point, pointii):
-        """Determine the vertical height at a horizontal between two points.
-
-         Arguments:
-             horizontal: float
-             point: tuple of floats
-             pointii: tuple of floats
-
-        Returns:
-            float
-        """
-
-        # calculate height
-        height = point[1] * (pointii[0] - horizontal) + pointii[1] * (horizontal - point[0]) / (pointii[0] - point[0])
-
-        return height
-
     def distribute(self):
         """Plot the distribution functions.
 
@@ -241,7 +241,7 @@ class Historian(list):
         return None
 
     def emit(self):
-        """Emit electrons from the cathode towards to detector.
+        """Emit electrons from the cathode towards the detector and capture detections
 
         Arguments:
             None
@@ -253,13 +253,16 @@ class Historian(list):
             self
         """
 
+        # open up tabulated values
+        table = self._load('table.json')
+
         # generate electrons
         while len(self) < self.electrons:
 
             # begin history at the source
             history = [self.source]
 
-            # add points to history
+            # random walk until it hits something
             live = True
             keep = False
             while live:
@@ -267,8 +270,9 @@ class Historian(list):
                 # pick angle at random
                 angle = random() * 2 * pi
 
-                # pick distance as sampling from a normal distribution
-                distance = self.sample()
+                # look up length from the table using a randomly generated quantile
+                quantile = str(round(random(), 3))
+                length = table[quantile]
 
                 # create new point
                 previous = history[-1]
@@ -276,42 +280,42 @@ class Historian(list):
                 history.append(point)
 
                 # check for hitting top
-                if previous[1] <= self.bounds[3] <= point[1]:
+                if previous[1] <= self.top <= point[1]:
 
                     # kill it
                     live = False
 
                 # check for hitting bottom
-                if point[1] <= self.bounds[2] <= previous[1]:
+                if point[1] <= self.bottom <= previous[1]:
 
                     # kill it
                     live = False
 
                 # check for hitting back
-                if point[0] <= self.bounds[0] <= previous[0]:
+                if point[0] <= self.back <= previous[0]:
 
                     # kill it
                     live = False
 
-                # check for hitting detector
-                if previous[0] <= self.bounds[1] <= point[0]:
-
-                    # kill it but keep it
-                    live = False
-                    keep = True
-
-                # check for hitting the divider
+                # check for hitting the divider, from either side
                 if previous[0] <= self.divider <= point[0] or point[0] <= self.divider <= previous[0]:
 
                     # kill it
                     live = False
 
                     # unless it went through the slit
-                    cross = self.cross(self.divider, previous, point)
-                    if self.slits[0][0] <= cross <= self.slits[0][1] or self.slits[1][0] <= cross <= self.slits[1][1]:
+                    cross = self._cross(self.divider, previous, point)
+                    if self.slits[0][1] <= cross <= self.slits[0][0] or self.slits[1][1] <= cross <= self.slits[1][0]:
 
                         # ressurect it
                         live = True
+
+                # check for hitting detector
+                if previous[0] <= self.detector <= point[0]:
+
+                    # kill it but keep it
+                    live = False
+                    keep = True
 
             # add history to self if keeping
             if keep:
@@ -325,59 +329,10 @@ class Historian(list):
                     # print status
                     print('{} electrons'.format(len(self), self.electrons))
 
+        # save the histories
+        self._dump(self, 'histories.json')
+
         return None
-
-    def sample(self):
-        """Sample a distance from the sin^2 distribution, using the newton rhapson method.
-
-        Arguments:
-            None
-
-        Returns:
-            float
-        """
-
-        # consider a normalesque probability density function p = (sin (pi x / 2))^2
-        # it has it's maximum at 1 and tapers off to 0 at 0 and 2
-        # the integral of this function describes a cumulative distribution c = (pi x - sin(pi x)) / 2 pi
-
-        # consider a number u, sampled at random from a uniform distribution from 0 to 1.  Setting this equal to the
-        # cumulative distribution function and solving for x will be the distance leading to the sin^2 distribution
-
-        # this is not solvable exactly, however, so newton's method will be used:
-        # x_n+1 = x_n - f(x_n) / f'(x_n), with an initial guess of 1
-        # u = (pi x - sin(pi x)) / 2 pi
-        # f(x) = pi x - sin(pi x)) - 2 pi u = 0
-        # f'(x) = pi - pi cos(pi x))
-
-        # get a random number from 0 to 1
-        number = random()
-
-        # define the function to zero, and its derivative
-        zero = lambda x: x - number - 0.5 + sin(2 * pi * x) / (2 * pi)
-        slope = lambda x: 1 + cos(2 * pi * x)
-
-        # define the tolerance
-        tolerance = 1e-12
-
-        # begin with initial guess 1
-        guess = 1.0
-
-        # evaluate the function
-        evaluation = zero(guess)
-        derivative = slope(guess)
-
-        # while the function evaluates to outside the tolerance
-        while abs(evaluation) > tolerance:
-
-            # adjust using newton's formula
-            guess = guess - evaluation / derivative
-
-            # evaluate the function
-            evaluation = zero(guess)
-            derivative = slope(guess)
-
-        return guess
 
     def see(self, number=1000):
         """See a number of paths.
