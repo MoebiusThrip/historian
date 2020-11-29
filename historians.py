@@ -562,7 +562,7 @@ class Historian(list):
 
         return None
 
-    def spray(self, block=10000):
+    def spray(self, block=10000, tolerance=1e-14):
         """Spray electrons toward the cathode in large blocks at a time.
 
         Arguments:
@@ -584,7 +584,7 @@ class Historian(list):
             verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
             electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(block, 1, 2)
 
-            # whittle down electrons until they hit the detector or a wall
+            # propagate electrons until they hit the detector or a wall
             while len(electrons) > 0:
 
                 # count number of surviving electrons
@@ -598,6 +598,21 @@ class Historian(list):
 
                 # create set of random quantiles
                 quantiles = random.rand(survivors)
+
+                # evaluate zeros for all quantiles
+                zeros = self.zero(lengths, quantiles)
+
+                # check for values above tolerance
+                while any([zeros > tolerance]):
+
+                    # use newton rhapson to get closer
+                    slopes = self.slope(lengths, quantiles)
+
+                    # make new lengths
+                    lengths = lengths - zeros / slopes
+
+                    # calculate new zeros
+                    zeros = self.zero(lengths, quantiles)
 
 
 
