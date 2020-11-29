@@ -442,10 +442,24 @@ class Historian(list):
                 self.append(history)
 
                 # safe
-                if len(self) % 1000 == 0:
+                if len(self) % 10000 == 0:
 
                     # save
-                    self._dump(self, 'histories.json')
+                    deposit = 'double_slit/histories_{}.json'.format(str(len(self)))
+                    self._dump(self[-1000:], 'histories.json')
+
+                    # summarize run
+                    final = time()
+                    percent = round(100 * self.electrons / count, 2)
+                    duration = round((final - start) / 60, 2)
+                    rate = round(self.electrons / duration, 0)
+                    average = round(numpy.average([len(history) for history in self]), 0)
+                    deviation = round(numpy.std([len(history) for history in self]), 0)
+
+                    # print results
+                    print('{} successful detections out of {} total, or {}%'.format(self.electrons, count, percent))
+                    print('took {} minutes, or {} electrons / minute'.format(duration, rate))
+                    print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
 
                 # print status
                 if len(self) % 10 == 0:
@@ -467,7 +481,7 @@ class Historian(list):
         print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
 
         # save the histories
-        self._dump(self, 'histories.json')
+        self._dump(self, 'double_slit/histories.json')
 
         return None
 
@@ -491,7 +505,7 @@ class Historian(list):
             discard = self.pop()
 
         # open up histories
-        histories = self._load('histories.json')
+        histories = self._load('double_slit/histories.json')
 
         # repopulate
         [self.append(history) for history in histories]
