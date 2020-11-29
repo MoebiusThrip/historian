@@ -622,14 +622,11 @@ class Historian(list):
         # build the apparatus
         self._build()
 
-        # trace most of the remaining trajectories
-        self._trace(trajectories[-20:-1])
+        # trace the remaining trajectories
+        self._trace(trajectories[-20:])
 
         # ignite the source
         self._ignite()
-
-        # trace the remainder
-        self._trace(trajectories[-1:])
 
         # # plot histogram
         # chunk = (self.top - self.bottom) / self.resolution
@@ -661,7 +658,7 @@ class Historian(list):
 
 # create instance
 historian = Historian(500000)
-#historian.emit()
+historian.emit()
 print('loading...')
 historian.populate()
 print('drawing...')
