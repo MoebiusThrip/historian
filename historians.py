@@ -219,6 +219,7 @@ class Historian(list):
         """
 
         # dump file
+        print('dumping into {}'.format(deposit))
         with open(deposit, 'w') as pointer:
 
             # dump contents
@@ -285,6 +286,7 @@ class Historian(list):
         """
 
         # open json file
+        print('loading {}...'.format(path))
         with open(path, 'r') as pointer:
 
             # get contents
@@ -591,7 +593,7 @@ class Historian(list):
 
         # set trajectory colors
         colors = ['r-', 'b-', 'c-', 'm-']
-        highlights = ['g-']
+        highlights = ['w-']
 
         # create trajectories for the subset
         trajectories = []
@@ -658,7 +660,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(500)
+historian = Historian(500000)
 #historian.emit()
 print('loading...')
 historian.populate()
