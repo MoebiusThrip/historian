@@ -11,13 +11,14 @@ import json
 from time import time
 
 # import random
-from numpy.random import random
 
 # import trig functions
 from math import sin, cos, pi, exp, log
 
 # import numpy
 import numpy
+from numpy.random import random
+from numpy import sin, cos, pi, exp, log
 
 # import matplotlib for plots
 from matplotlib import pyplot
@@ -48,26 +49,29 @@ class Historian(list):
             None
         """
 
+        # current time
+        self.time = time()
+
         # set number of electrons
         self.electrons = electrons
 
         # set up apparatus
-        self.top = 20
-        self.bottom = -20
+        self.top = 30
+        self.bottom = -30
         self.back = -20
         self.divider = 0
-        self.screen = 20
+        self.screen = 30
         self.source = (-10, 0)
 
         # configure slits
         self.gap = 1
-        self.space = 3
+        self.space = 7
         self.statuses = [status, statusii]
         self.slits = []
         self._configure()
 
         # set histogram resolution
-        self.resolution = 1000
+        self.resolution = 10000
 
         # set tabulation precision
         self.precision = 3
@@ -125,11 +129,17 @@ class Historian(list):
         bottom = self.bottom
         divider = self.divider
         pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-', linewidth=3)
+        pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'g-', linewidth=1)
 
         # plot slits
         pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'k-', linewidth=3)
         pyplot.plot([divider, divider], [self.slits[0][1], self.slits[1][0]], 'k-', linewidth=3)
         pyplot.plot([divider, divider], [self.slits[0][0], top], 'k-', linewidth=3)
+
+        # plot slits
+        pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'g-', linewidth=1)
+        pyplot.plot([divider, divider], [self.slits[0][1], self.slits[1][0]], 'g-', linewidth=1)
+        pyplot.plot([divider, divider], [self.slits[0][0], top], 'g-', linewidth=1)
 
         # add light to screen
         pyplot.plot([right, right], [top, bottom], 'g-', linewidth=2)
@@ -237,6 +247,9 @@ class Historian(list):
             None
         """
 
+        # status
+        print('plotting histogram...')
+
         # plot histogram
         chunk = (self.top - self.bottom) / self.resolution
         bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
@@ -253,8 +266,7 @@ class Historian(list):
 
             # plot the height
             middle = (bin[0] + bin[1]) / 2
-            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=1)
-            #pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
+            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=0.5)
 
         return None
 
@@ -294,6 +306,31 @@ class Historian(list):
 
         return contents
 
+    def _time(self, message):
+        """Start timing a block of code, and print results with a message.
+
+        Arguments:
+            message: str
+
+        Returns:
+            None
+        """
+
+        # get final time
+        final = time()
+
+        # calculate duration and reset time
+        duration = final - self.time
+        self.time = final
+
+        # print duration
+        print('took {} seconds.'.format(duration))
+
+        # begin new block
+        print(message)
+
+        return None
+
     def _trace(self, trajectories):
         """Trace trajectories on the plot.
 
@@ -304,6 +341,9 @@ class Historian(list):
             None
         """
 
+        # status
+        print('plotting trajectories...')
+
         # plot the trajectories
         for history, color, opacity in trajectories:
 
@@ -312,7 +352,7 @@ class Historian(list):
             verticals = numpy.array([point[1] for point in history])
 
             # plot
-            pyplot.plot(horizontals, verticals, color, alpha=opacity)
+            pyplot.plot(horizontals, verticals, color, alpha=opacity, linewidth=0.5)
 
         return None
 
@@ -374,10 +414,14 @@ class Historian(list):
             history = [self.source]
             count += 1
 
+            self._time('starting...')
+
             # random walk until it hits something
             live = True
             keep = False
             while live:
+
+                self._time('starting electron...')
 
                 # generate more random numbers
                 if len(randoms) < 10:
@@ -392,10 +436,14 @@ class Historian(list):
                 index = int(randoms.pop() * 10 ** self.precision)
                 length = table[index]
 
+                self._time('made randoms')
+
                 # create new point
                 previous = history[-1]
                 point = (previous[0] + length * cos(angle), previous[1] + length * sin(angle))
                 history.append(point)
+
+                self._time('appened point')
 
                 # check for hitting top
                 if previous[1] <= self.top <= point[1]:
@@ -435,13 +483,21 @@ class Historian(list):
                     live = False
                     keep = True
 
+                self._time('checked_status')
+
             # add history to self if keeping
             if keep:
 
                 # append to self
                 self.append(history)
 
-                # safe
+                # print status
+                if len(self) % 10 == 0:
+
+                    # print status
+                    print('{} electrons'.format(len(self), self.electrons))
+
+                # save
                 if len(self) % 10000 == 0:
 
                     # save
@@ -460,12 +516,6 @@ class Historian(list):
                     print('{} successful detections out of {} total, or {}%'.format(self.electrons, count, percent))
                     print('took {} minutes, or {} electrons / minute'.format(duration, rate))
                     print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
-
-                # print status
-                if len(self) % 10 == 0:
-
-                    # print status
-                    print('{} electrons'.format(len(self), self.electrons))
 
         # summarize run
         final = time()
@@ -511,6 +561,52 @@ class Historian(list):
         [self.append(history) for history in histories]
 
         return None
+
+    def spray(self, block=10000):
+        """Spray electrons toward the cathode in large blocks at a time.
+
+        Arguments:
+            block=10000: block size
+
+        Returns:
+            None
+
+        Populates:
+            self
+        """
+
+        # repeat until full
+        full = False
+        while not full:
+
+            # begin a block of electrons at the source
+            horizontals = numpy.full(block, self.source[0]).reshape(-1, 1)
+            verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
+            electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(block, 1, 2)
+
+            # whittle down electrons until they hit the detector or a wall
+            while len(electrons) > 0:
+
+                # count number of surviving electrons
+                survivors = len(electrons)
+
+                # create set of random angles
+                angles = random.rand(survivors) * 2 * pi
+
+                # create set of lengths all at 1
+                lengths = numpy.full(survivors, 1.0)
+
+                # create set of random quantiles
+                quantiles = random.rand(survivors)
+
+
+
+
+
+            # set to full
+            full = True
+
+        return electrons
 
     def tabulate(self, precision=None, tolerance=1e-14):
         """Tabulate values of the quantile integral to be looked up during random walk generation.
@@ -589,11 +685,12 @@ class Historian(list):
 
         return None
 
-    def view(self, number=1000):
+    def view(self, number=1000, resolution=None):
         """View the histories.
 
         Arguments:
             number: int, max number of histories to plot
+            resolution: int, number of histogram boxes
 
         Returns:
             None
@@ -601,6 +698,9 @@ class Historian(list):
 
         # begin plot
         pyplot.clf()
+
+        # set resolution
+        resolution = resolution or self.resolution
 
         # plot the histograph
         self._graph()
@@ -642,25 +742,6 @@ class Historian(list):
         # ignite the source
         self._ignite()
 
-        # # plot histogram
-        # chunk = (self.top - self.bottom) / self.resolution
-        # bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
-        #
-        # # populate bins
-        # population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
-        #
-        # # normalize population
-        # maximum = max(population)
-        # population = [entry * 10 / maximum for entry in population]
-        #
-        # # plot it
-        # for bin, quantity in zip(bins, population):
-        #
-        #     # plot the height
-        #     middle = (bin[0] + bin[1]) / 2
-        #     pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=3)
-        #     pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
-
         # remove ticks
         pyplot.gca().set_xticks([])
         pyplot.gca().set_yticks([])
@@ -671,9 +752,8 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(500000)
-historian.emit()
-print('loading...')
-historian.populate()
-print('drawing...')
-historian.view()
+historian = Historian(10)
+# historian.emit()
+# historian.spray()
+# historian.populate()
+# historian.view(resolution=1000)
