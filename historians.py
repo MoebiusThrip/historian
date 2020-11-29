@@ -5,6 +5,7 @@ from importlib import reload
 
 # import system tools
 import os, sys
+import json
 
 # import random
 from random import random
@@ -127,7 +128,7 @@ class Historian(list):
 
         return None
 
-    def _crank(self, quantile, guess=1.0, tolerance=1e-12):
+    def _crank(self, quantile, guess=1.0, tolerance=1e-14):
         """Crank through Newton Rhapson to solve the quantile equation for a segment length.
 
         Arguments:
@@ -453,12 +454,46 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        pyplot.savefig('history.png')
+        pyplot.savefig('histories.png')
 
         return
 
+    def tabulate(self, precision=3, tolerance=1e-14):
+        """Tabulate values of the quantile integral to be looked up during random walk generation.
+
+        Arguments:
+            precision=3: int, precision of table
+            tolerance=1e-16: float, tolerance for newton-rhapson convergence
+
+        Returns:
+            None
+        """
+
+        # generate all quantiles
+        quantiles = [float(number) / 10 ** precision for number in range(10 ** precision + 1)]
+
+        # generate all lengths
+        lengths = []
+        for index, quantile in enumerate(quantiles):
+
+            # print status
+            if index % 10 == 0:
+
+                # print status
+                print('calculating quantile {} of {}'.format(index, len(quantiles)))
+
+            # calculate length and make a string
+            length = self._crank(quantile, guess=1.0, tolerance=tolerance)
+            lengths.append(length)
+
+        # create table from rounded quantile strings
+        table = {str(round(quantile, precision)): length for quantile, length in zip(quantiles, lengths)}
+        self._dump(table, 'table.json')
+
+        return None
+
     def verify(self, trials=10000):
-        """Test the distribution resulting from the inverse quantile function.
+        """Test the distribution resulting from the inverse quantile function and lookup table.
 
         Arguments:
             None
@@ -467,8 +502,11 @@ class Historian(list):
             None
         """
 
+        # load in table
+        table = self._load('table.json')
+
         # find all lengths based on random number selection
-        lengths = [self._crank(random()) for _ in range(trials)]
+        lengths = [table[str(round(random(), 3))] for _ in range(trials)]
 
         # bin them to draw a histogram
         middles, heights = self._bin(lengths, resolution=100, start=0.5, finish=1.5)
