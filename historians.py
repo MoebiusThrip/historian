@@ -11,7 +11,7 @@ import json
 from time import time
 
 # import random
-from random import random
+from numpy.random import random
 
 # import trig functions
 from math import sin, cos, pi
@@ -68,6 +68,9 @@ class Historian(list):
 
         # set histogram resolution
         self.resolution = 100
+
+        # set tabulation precision
+        self.precision = 3
 
         # define probability distribution functions
         self.distribution = lambda x:  2 * cos(pi * x) ** 2
@@ -259,6 +262,9 @@ class Historian(list):
         # open up tabulated values
         table = self._load('table.json')
 
+        # generate set of random floats
+        randoms = random(size=1000000).tolist()
+
         # generate electrons
         count = 0
         start = time()
@@ -273,16 +279,22 @@ class Historian(list):
             keep = False
             while live:
 
+                # generate more random numbers
+                if len(randoms) < 10:
+
+                    # generate more random numbers
+                    randoms = random(size=1000000).tolist() + randoms
+
                 # pick angle at random
-                angle = random() * 2 * pi
+                angle = randoms.pop() * 2 * pi
 
                 # look up length from the table using a randomly generated quantile
-                quantile = str(round(random(), 3))
-                length = table[quantile]
+                index = int(randoms.pop() * 10 ** self.precision)
+                length = table[index]
 
                 # create new point
                 previous = history[-1]
-                point = (previous[0] + distance * cos(angle), previous[1] + distance * sin(angle))
+                point = (previous[0] + length * cos(angle), previous[1] + length * sin(angle))
                 history.append(point)
 
                 # check for hitting top
@@ -313,11 +325,11 @@ class Historian(list):
                     cross = self._cross(self.divider, previous, point)
                     if self.slits[0][1] <= cross <= self.slits[0][0] or self.slits[1][1] <= cross <= self.slits[1][0]:
 
-                        # ressurect it
+                        # resurrect it
                         live = True
 
                 # check for hitting detector
-                if previous[0] <= self.detector <= point[0]:
+                if previous[0] <= self.screen <= point[0]:
 
                     # kill it but keep it
                     live = False
@@ -337,13 +349,16 @@ class Historian(list):
 
         # summarize run
         final = time()
-        percent = round(100 * count / self.electrons, 2)
-        duration = round((final - initial) / 60, 2)
-        rate = round(self.electrons / self.duration, 0)
+        percent = round(100 * self.electrons / count, 2)
+        duration = round((final - start) / 60, 2)
+        rate = round(self.electrons / duration, 0)
+        average = round(numpy.average([len(history) for history in self]), 0)
+        deviation = round(numpy.std([len(history) for history in self]), 0)
 
         # print results
         print('{} successful detections out of {} total, or {}%'.format(self.electrons, count, percent))
         print('took {} minutes, or {} electrons / minute'.format(duration, rate))
+        print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
 
         # save the histories
         self._dump(self, 'histories.json')
@@ -377,7 +392,7 @@ class Historian(list):
 
         return None
 
-    def tabulate(self, precision=3, tolerance=1e-14):
+    def tabulate(self, precision=None, tolerance=1e-14):
         """Tabulate values of the quantile integral to be looked up during random walk generation.
 
         Arguments:
@@ -387,6 +402,9 @@ class Historian(list):
         Returns:
             None
         """
+
+        # set precision
+        precision = precision or self.precision
 
         # generate all quantiles
         quantiles = [float(number) / 10 ** precision for number in range(10 ** precision + 1)]
@@ -405,9 +423,8 @@ class Historian(list):
             length = self._crank(quantile, guess=1.0, tolerance=tolerance)
             lengths.append(length)
 
-        # create table from rounded quantile strings
-        table = {str(round(quantile, precision)): length for quantile, length in zip(quantiles, lengths)}
-        self._dump(table, 'table.json')
+        # store lengths indexed by 10^precision * quantile
+        self._dump(lengths, 'table.json')
 
         return None
 
@@ -453,7 +470,7 @@ class Historian(list):
         return None
 
     def view(self, number=1000):
-        """See a number of paths.
+        """View a number of paths.
 
         Arguments:
             number: int, max number of histories to plot
@@ -469,13 +486,17 @@ class Historian(list):
         pyplot.clf()
 
         # plot detector
-        left, right, bottom, top = self.bounds
+        left = self.back
+        right = self.screen
+        top = self.top
+        bottom = self.bottom
+        divider = self.divider
         pyplot.plot([left, left, right, right, left], [top, bottom, bottom, top, top], 'k-')
 
         # plot slits
-        pyplot.plot([self.divider, self.divider], [bottom, self.slits[0][0]], 'k-')
-        pyplot.plot([self.divider, self.divider], [self.slits[0][1], self.slits[1][0]], 'k-')
-        pyplot.plot([self.divider, self.divider], [self.slits[1][1], top], 'k-')
+        pyplot.plot([divider, divider], [bottom, self.slits[1][1]], 'k-')
+        pyplot.plot([divider, divider], [self.slits[0][1], self.slits[1][0]], 'k-')
+        pyplot.plot([divider, divider], [self.slits[0][0], top], 'k-')
 
         # make colors
         colors = ['r-', 'b-', 'c-', 'm-']
@@ -504,11 +525,11 @@ class Historian(list):
         pyplot.plot(self.source[0], self.source[1], 'wo', markersize=4)
 
         # plot histogram
-        chunk = (self.bounds[3] - self.bounds[2]) / self.resolution
-        bins = [(self.bounds[2] + index * chunk, self.bounds[2] + (index + 1) * chunk) for index in range(self.resolution)]
+        chunk = (self.top - self.bottom) / self.resolution
+        bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
 
         # populate bins
-        population = [len([member for member in self if bin[0] < self.cross(self.bounds[1], member[0], member[1]) < bin[1]]) for bin in bins]
+        population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
 
         # normalize population
         maximum = max(population)
@@ -519,8 +540,8 @@ class Historian(list):
 
             # plot the height
             middle = (bin[0] + bin[1]) / 2
-            pyplot.plot([self.bounds[1] + 1, self.bounds[1] + 1 + quantity], [middle, middle], 'g-', linewidth=3)
-            pyplot.plot([self.bounds[1] + 1, self.bounds[1] + 1 + quantity], [middle, middle], 'y-', linewidth=1)
+            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=3)
+            pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'y-', linewidth=1)
 
         # remove ticks
         pyplot.gca().set_xticks([])
@@ -532,7 +553,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(100)
-historian.verify()
-# historian.emit()
-# historian.see()
+historian = Historian(50000)
+historian.emit()
+historian.populate()
+historian.view()
