@@ -17,8 +17,8 @@ from math import sin, cos, pi, exp, log
 
 # import numpy
 import numpy
-from numpy.random import random, rand
-from numpy import sin, cos, pi, exp, log
+from numpy.random import random, rand, randint
+from numpy import sin, cos, pi, exp, log, sqrt
 
 # import matplotlib for plots
 from matplotlib import pyplot
@@ -254,8 +254,9 @@ class Historian(list):
         chunk = (self.top - self.bottom) / self.resolution
         bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
 
-        # populate bins
-        population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
+        # populate bins\
+        population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
+        #population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
 
         # normalize population
         maximum = max(population)
@@ -305,6 +306,22 @@ class Historian(list):
             contents = json.load(pointer)
 
         return contents
+
+    def _measure(self, point, pointii):
+        """Measure the distance between two points.
+
+        Arguments:
+            point: tuple of floats
+            pointii: tuple of floats
+
+        Returns:
+            float
+        """
+
+        # calculate length
+        length = sqrt((pointii[0] - point[0]) ** 2 + (pointii[1] - point[1]) ** 2)
+
+        return length
 
     def _time(self, message):
         """Start timing a block of code, and print results with a message.
@@ -562,7 +579,7 @@ class Historian(list):
 
         return None
 
-    def spray(self, block=100000, tolerance=1e-14):
+    def spray(self, block=1000000, tolerance=1e-14):
         """Spray electrons toward the cathode in large blocks at a time.
 
         Arguments:
@@ -574,6 +591,9 @@ class Historian(list):
         Populates:
             self
         """
+
+        # open up tabulated values
+        table = self._load('table.json')
 
         # begin the clock and count
         start = time()
@@ -609,27 +629,33 @@ class Historian(list):
 
                 # create set of random angles
                 angles = rand(survivors) * 2 * pi
+                #
+                # # create set of lengths all at 1
+                # lengths = numpy.full(survivors, 1.0)
 
-                # create set of lengths all at 1
-                lengths = numpy.full(survivors, 1.0)
+                # # create set of random quantiles
+                # quantiles = rand(survivors)
+                #
+                # # evaluate zeros for all quantiles
+                # zeros = self.zero(lengths, quantiles)
+                #
+                # # check for values above tolerance
+                # while numpy.any(zeros > tolerance):
+                #
+                #     # use newton rhapson to get closer
+                #     slopes = self.slope(lengths, quantiles)
+                #
+                #     # make new lengths
+                #     lengths = lengths - zeros / slopes
+                #
+                #     # calculate new zeros
+                #     zeros = self.zero(lengths, quantiles)
 
-                # create set of random quantiles
-                quantiles = rand(survivors)
+                # create set of random ints
+                indices = randint(1001, size=(survivors,))
 
-                # evaluate zeros for all quantiles
-                zeros = self.zero(lengths, quantiles)
-
-                # check for values above tolerance
-                while numpy.any(zeros > tolerance):
-
-                    # use newton rhapson to get closer
-                    slopes = self.slope(lengths, quantiles)
-
-                    # make new lengths
-                    lengths = lengths - zeros / slopes
-
-                    # calculate new zeros
-                    zeros = self.zero(lengths, quantiles)
+                # get lengths from table
+                lengths = numpy.array([table[index] for index in indices])
 
                 # make new random walk
                 horizontals = numpy.add(electrons[:, -1, 0], numpy.multiply(lengths, cos(angles))).reshape(-1, 1)
@@ -646,22 +672,21 @@ class Historian(list):
                 # prune off those that hit the back
                 electrons = electrons[electrons[:, -1, 0] > self.back]
 
-                # keep all the electrons that hit the detector
+                # keep all the electrons that hit the detector but remove from live electrons
                 detections = electrons[electrons[:, -1, 0] > self.screen]
-                [self.append(history) for history in detections]
-
-                # but prune them off the live electrons
                 electrons = electrons[electrons[:, -1, 0] < self.screen]
 
-                #print('electrons: {}'.format(electrons.shape))
+                # cut detections off at the screen
+                if len(detections) > 0:
+
+                    # determine cutoff point and append
+                    detections[:, -1] = numpy.array([self.screen, self._cross(self.screen, detections[:, -2], detections[:, -1])])
+                    [self.append(history) for history in detections]
 
                 # find those that span the divider and remove them
                 spanning = (electrons[:, -2, 0] < self.divider) != (electrons[:, -1, 0] < self.divider)
                 spanners = electrons[spanning]
                 electrons = electrons[~spanning]
-
-                #print('spanners: {}'.format(spanners.shape))
-                #print('electrons: {}'.format(electrons.shape))
 
                 # find the slopes from the approaching points to all slit edges
                 approaches = []
@@ -671,8 +696,6 @@ class Historian(list):
                     # create the array
                     approach = (edge - spanners[:, -2, 1]) / (self.divider - spanners[:, -2, 0])
                     approaches.append(approach)
-
-                #print('edges: {}'.format(edges))
 
                 # find the slopes from the departing points to all slit edges
                 departures = []
@@ -691,18 +714,6 @@ class Historian(list):
 
                 # add passers back to electrons
                 electrons = numpy.concatenate([electrons, passers], axis=0)
-
-                # if len(spanners) > 0:
-                #
-                #     print('spanners: {}'.format(spanners))
-                #     print('approaches: {}'.format(approaches))
-                #     print('departures: {}'.format(departures))
-                #     print('curvatures: {}'.format(curvatures))
-                #     print('product: {}'.format(product))
-                #     print('passers: {}'.format(passers))
-                #     print('slits: {}'.format(self.slits))
-                #
-                #     return
 
             # summarize block
             final = time()
@@ -867,9 +878,9 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(10000)
+historian = Historian(100)
 historian.spray()
 # historian.emit()
 # historian.spray()
 # historian.populate()
-historian.view()
+#historian.view()
