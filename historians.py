@@ -653,15 +653,15 @@ class Historian(list):
                 # but prune them off the live electrons
                 electrons = electrons[electrons[:, -1, 0] < self.screen]
 
-                print('electrons: {}'.format(electrons.shape))
+                #print('electrons: {}'.format(electrons.shape))
 
                 # find those that span the divider and remove them
                 spanning = (electrons[:, -2, 0] < self.divider) != (electrons[:, -1, 0] < self.divider)
                 spanners = electrons[spanning]
                 electrons = electrons[~spanning]
 
-                print('spanners: {}'.format(spanners.shape))
-                print('electrons: {}'.format(electrons.shape))
+                #print('spanners: {}'.format(spanners.shape))
+                #print('electrons: {}'.format(electrons.shape))
 
                 # find the slopes from the approaching points to all slit edges
                 approaches = []
@@ -672,12 +672,14 @@ class Historian(list):
                     approach = (edge - spanners[:, -2, 1]) / (self.divider - spanners[:, -2, 0])
                     approaches.append(approach)
 
+                #print('edges: {}'.format(edges))
+
                 # find the slopes from the departing points to all slit edges
                 departures = []
                 for edge in edges:
 
                     # create the array
-                    departure = (spanners[:, -1, 1] - edge) / (spanners[:, -2, 0] - self.divider)
+                    departure = (spanners[:, -1, 1] - edge) / (spanners[:, -1, 0] - self.divider)
                     departures.append(departure)
 
                 # calculate all differences between departing and approaching slopes (curvatures)
@@ -690,15 +692,17 @@ class Historian(list):
                 # add passers back to electrons
                 electrons = numpy.concatenate([electrons, passers], axis=0)
 
-                if len(spanners) > 0:
-
-                    print('spanners: {}'.format(spanners))
-                    print('approaches: {}'.format(approaches))
-                    print('departures: {}'.format(departures))
-                    print('curvatures: {}'.format(curvatures))
-                    
-
-                    return
+                # if len(spanners) > 0:
+                #
+                #     print('spanners: {}'.format(spanners))
+                #     print('approaches: {}'.format(approaches))
+                #     print('departures: {}'.format(departures))
+                #     print('curvatures: {}'.format(curvatures))
+                #     print('product: {}'.format(product))
+                #     print('passers: {}'.format(passers))
+                #     print('slits: {}'.format(self.slits))
+                #
+                #     return
 
             # summarize block
             final = time()
@@ -863,9 +867,9 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(1000)
+historian = Historian(10000)
 historian.spray()
 # historian.emit()
 # historian.spray()
 # historian.populate()
-#historian.view()
+historian.view()
