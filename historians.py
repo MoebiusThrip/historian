@@ -213,7 +213,7 @@ class Historian(list):
         """
 
         # calculate height
-        height = point[1] * (pointii[0] - horizontal) + pointii[1] * (horizontal - point[0]) / (pointii[0] - point[0])
+        height = point[0][1] * (pointii[0][0] - horizontal) + pointii[0][1] * (horizontal - point[0][0]) / (pointii[0][0] - point[0][0])
 
         return height
 
@@ -579,7 +579,7 @@ class Historian(list):
 
         return None
 
-    def spray(self, block=1000000, tolerance=1e-14):
+    def spray(self, block=1000, tolerance=1e-14):
         """Spray electrons toward the cathode in large blocks at a time.
 
         Arguments:
@@ -617,12 +617,12 @@ class Historian(list):
             stones = 0
             while len(electrons) > 0:
 
-                # increase stone
-                stones += 1
-                if stones % 100 == 0:
-
-                    # print status
-                    print('{} steps so far, {} electrons left...'.format(stones, len(electrons)))
+                # # increase stone
+                # stones += 1
+                # if stones % 400 == 0:
+                #
+                #     # print status
+                #     print('{} steps so far, {} electrons left...'.format(stones, len(electrons)))
 
                 # count number of surviving electrons
                 survivors = len(electrons)
@@ -729,8 +729,11 @@ class Historian(list):
             print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
 
             # save file
-            histories = [history.tolist() for history in self]
-            self._dump(histories, 'histories.json')
+            if count % 100 == 0:
+
+                # save file
+                histories = [history.tolist() for history in self]
+                self._dump(histories, 'histories.json')
 
         return None
 
@@ -878,9 +881,9 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian(100)
+historian = Historian(100000)
 historian.spray()
 # historian.emit()
 # historian.spray()
 # historian.populate()
-#historian.view()
+historian.view()
