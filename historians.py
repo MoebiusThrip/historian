@@ -37,7 +37,7 @@ class Historian(list):
         list
     """
 
-    def __init__(self, electrons=100, status=True, statusii=True):
+    def __init__(self, directory, electrons=100, wave=10000, status=True, statusii=True):
         """Initialize a historian instance.
 
         Arguments:
@@ -49,11 +49,17 @@ class Historian(list):
             None
         """
 
+        # set current directory
+        self.directory = directory
+
         # current time
         self.time = time()
 
-        # set number of electrons
+        # set number of total electrons to capture
         self.electrons = electrons
+
+        # set number of electrons per wave
+        self.wave = wave
 
         # set up apparatus
         self.top = 20
@@ -64,7 +70,7 @@ class Historian(list):
         self.source = (-10, 0)
 
         # configure slits
-        self.gap = 1
+        self.gap = 0.5
         self.space = 7
         self.statuses = [status, statusii]
         self.slits = []
@@ -571,19 +577,30 @@ class Historian(list):
             # discard
             discard = self.pop()
 
-        # open up histories
-        histories = self._load('double_slit/histories.json')
+        # get all histories
+        histories = []
+        waves = os.listdir(self.directory)
+        waves = [wave for wave in waves if '.png' not in wave]
+        for wave in waves:
+
+            # open up histories
+            path = '{}/{}'.format(self.directory, wave)
+            histories += self._load(path)
 
         # repopulate
         [self.append(history) for history in histories]
 
+        # print length
+        print('{} trajectories.'.format(len(histories)))
+
         return None
 
-    def spray(self, block=1000, tolerance=1e-14):
-        """Spray electrons toward the cathode in large blocks at a time.
+    def spatter(self, block=1000, steps=1000, tolerance=1e-14):
+        """Spatter electrons toward the cathode in large blocks at a time.
 
         Arguments:
-            block=10000: block size
+            block=1000: block size
+            steps=1000: number of steps in path
 
         Returns:
             None
@@ -598,24 +615,55 @@ class Historian(list):
         # begin the clock and count
         start = time()
         count = 0
+        successes = 0
+        accumulation = 0
+
+        # scan all files in directory
+        waves = os.listdir(self.directory)
+        total = sum([int(wave.split('_')[1]) for wave in waves if 'png' not in wave])
+        wave = len(waves)
+
+        # self._time('begin collection...')
 
         # repeat until full
-        while len(self) < self.electrons:
+        while total < self.electrons:
 
             # print
-            print('spraying {} electrons...'.format(block))
+            # self._time('spraying {} electrons...'.format(block))
 
             # increase count
             count += 1
 
-            # begin a block of electrons at the source
-            horizontals = numpy.full(block, self.source[0]).reshape(-1, 1)
-            verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
-            electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
+            # # begin a block of electrons at the source
+            # horizontals = numpy.full(block, self.source[0]).reshape(-1, 1)
+            # verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
+            # electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
+
+            # begin a block of electrons
+            electrons = numpy.zeros((block, steps, 2))
+
+            # fill first with source coordinates
+            electrons[:, 0, 0] = numpy.array([self.source[0]] * block)
+            electrons[:, 0, 1] = numpy.array([self.source[1]] * block)
+            step = 0
+
+            # self._time('began block')
 
             # propagate electrons until they hit the detector or a wall
             stones = 0
             while len(electrons) > 0:
+
+                # print(step, len(electrons))
+
+                # increase step
+                step += 1
+
+                # check for last step
+                if step == len(electrons[0]) - 1:
+
+                    # add new block
+                    news = numpy.zeros((len(electrons), steps, 2))
+                    electrons = numpy.concatenate([electrons, news], axis=1)
 
                 # # increase stone
                 # stones += 1
@@ -632,6 +680,8 @@ class Historian(list):
                 #
                 # # create set of lengths all at 1
                 # lengths = numpy.full(survivors, 1.0)
+
+                # self._time('made angles')
 
                 # # create set of random quantiles
                 # quantiles = rand(survivors)
@@ -654,27 +704,272 @@ class Historian(list):
                 # create set of random ints
                 indices = randint(1001, size=(survivors,))
 
+                # self._time('made random ints')
+
                 # get lengths from table
                 lengths = numpy.array([table[index] for index in indices])
+
+                # self._time('checked lengths')
+
+                # make new random walk
+                horizontals = numpy.add(electrons[:, step - 1, 0], numpy.multiply(lengths, cos(angles))).reshape(-1, 1)
+                verticals = numpy.add(electrons[:, step - 1, 1], numpy.multiply(lengths, sin(angles))).reshape(-1, 1)
+                walk = numpy.concatenate([horizontals, verticals], axis=1)
+                    #.reshape(-1, 1, 2)
+                #
+                # self._time('made new steps')
+
+                # # add to electron trajectories
+                # cube = numpy.zeros((electrons.shape[0], electrons.shape[1] + 1, 2))
+                # cube[:, :len(electrons[0]), :2] = electrons
+                # cube[:, len(electrons[0]):, :2] = walk
+                # electrons = cube
+
+                electrons[:, step] = walk
+                # self._time('added to current stash')
+
+                # prune off those that hit the top and bottom
+                electrons = electrons[electrons[:, step, 1] < self.top]
+                electrons = electrons[electrons[:, step, 1] > self.bottom]
+
+                # self._time('pruned off top and bottom')
+
+                # prune off those that hit the back
+                electrons = electrons[electrons[:, step, 0] > self.back]
+
+                # self._time('pruned off back')
+
+                # keep all the electrons that hit the detector but remove from live electrons
+                detections = electrons[electrons[:, step, 0] > self.screen]
+                electrons = electrons[electrons[:, step, 0] < self.screen]
+
+                # add to successes
+                successes += len(detections)
+                accumulation += len(detections)
+
+                # cut detections off at the screen
+                if len(detections) > 0:
+
+                    # determine cutoff point and append
+                    detections[:, step] = numpy.array([self.screen, self._cross(self.screen, detections[:, step - 1], detections[:, step])])
+                    [self.append(history[:step + 1]) for history in detections]
+
+                # self._time('getting cutoff points')
+
+                # find those that span the divider and remove them
+                spanning = (electrons[:, step - 1, 0] < self.divider) != (electrons[:, step, 0] < self.divider)
+                spanners = electrons[spanning]
+                electrons = electrons[~spanning]
+
+                # self._time('finding spanners')
+
+                # find the slopes from the approaching points to all slit edges
+                approaches = []
+                edges = [entry for slit in self.slits for entry in slit]
+                for edge in edges:
+
+                    # create the array
+                    approach = (edge - spanners[:, step - 1, 1]) / (self.divider - spanners[:, step - 1, 0])
+                    approaches.append(approach)
+
+                # self._time('calculating approaches')
+
+                # find the slopes from the departing points to all slit edges
+                departures = []
+                for edge in edges:
+
+                    # create the array
+                    departure = (spanners[:, step, 1] - edge) / (spanners[:, step, 0] - self.divider)
+                    departures.append(departure)
+
+                # self._time('calculating departures')
+
+                # calculate all differences between departing and approaching slopes (curvatures)
+                curvatures = [numpy.subtract(approach, departure) for approach, departure in zip(approaches, departures)]
+
+                # self._time('calculating curvatures')
+
+                # if the product of all curvatures is negative, the electron went through a slit
+                product = numpy.prod(numpy.vstack(curvatures), axis=0)
+                passers = spanners[product < 0]
+
+                # self._time('found spanners')
+
+                # add passers back to electrons
+                electrons = numpy.concatenate([electrons, passers], axis=0)
+
+                # self._time('concatenating total')
+
+            # summarize block
+            final = time()
+            emissions = count * block
+            percent = round(100 * accumulation / emissions, 2)
+            duration = round((final - start) / 60, 2)
+            rate = round(accumulation / duration, 0)
+            average = round(numpy.average([len(history) for history in self]), 0)
+            deviation = round(numpy.std([len(history) for history in self]), 0)
+
+            # print results
+            if count % 2 == 0:
+
+                # prnt
+                print('{} successful detections out of {} total, or {}%'.format(accumulation, emissions, percent))
+                print('took {} minutes, or {} electrons / minute'.format(duration, rate))
+                print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
+
+            # save file
+            if successes > self.wave:
+
+                # get histories
+                histories = []
+                while len(self) > 0:
+
+                    # depopulate
+                    histories.append(self.pop())
+
+                # save file
+                deposit = '{}/histories_{}_{}.json'.format(self.directory, successes, wave)
+                histories = [history.tolist() for history in histories]
+                self._dump(histories, deposit)
+
+                # increase wave
+                wave += 1
+
+                # add to total and reset count
+                total += successes
+                successes = 0
+
+        return None
+
+    def spray(self, block=1000, tolerance=1e-14):
+        """Spray electrons toward the cathode in large blocks at a time.
+
+        Arguments:
+            block=10000: block size
+
+        Returns:
+            None
+
+        Populates:
+            self
+        """
+
+        # open up tabulated values
+        table = self._load('table.json')
+
+        # begin the clock and count
+        start = time()
+        count = 0
+        successes = 0
+        accumulation = 0
+
+        # scan all files in directory
+        waves = os.listdir(self.directory)
+        total = sum([int(wave.split('_')[1]) for wave in waves if 'png' not in wave])
+        wave = len(waves)
+
+        # self._time('begin collection...')
+
+        # repeat until full
+        while total < self.electrons:
+
+            # print
+            # self._time('spraying {} electrons...'.format(block))
+
+            # increase count
+            count += 1
+
+            # begin a block of electrons at the source
+            horizontals = numpy.full(block, self.source[0]).reshape(-1, 1)
+            verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
+            electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
+
+            # self._time('began block')
+
+            # propagate electrons until they hit the detector or a wall
+            stones = 0
+            while len(electrons) > 0:
+
+                # # increase stone
+                # stones += 1
+                # if stones % 400 == 0:
+                #
+                #     # print status
+                #     print('{} steps so far, {} electrons left...'.format(stones, len(electrons)))
+
+                # count number of surviving electrons
+                survivors = len(electrons)
+
+                # create set of random angles
+                angles = rand(survivors) * 2 * pi
+                #
+                # # create set of lengths all at 1
+                # lengths = numpy.full(survivors, 1.0)
+
+                # self._time('made angles')
+
+                # # create set of random quantiles
+                # quantiles = rand(survivors)
+                #
+                # # evaluate zeros for all quantiles
+                # zeros = self.zero(lengths, quantiles)
+                #
+                # # check for values above tolerance
+                # while numpy.any(zeros > tolerance):
+                #
+                #     # use newton rhapson to get closer
+                #     slopes = self.slope(lengths, quantiles)
+                #
+                #     # make new lengths
+                #     lengths = lengths - zeros / slopes
+                #
+                #     # calculate new zeros
+                #     zeros = self.zero(lengths, quantiles)
+
+                # create set of random ints
+                indices = randint(1001, size=(survivors,))
+
+                # self._time('made random ints')
+
+                # get lengths from table
+                lengths = numpy.array([table[index] for index in indices])
+
+                # self._time('checked lengths')
 
                 # make new random walk
                 horizontals = numpy.add(electrons[:, -1, 0], numpy.multiply(lengths, cos(angles))).reshape(-1, 1)
                 verticals = numpy.add(electrons[:, -1, 1], numpy.multiply(lengths, sin(angles))).reshape(-1, 1)
                 walk = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
+                #
+                # self._time('made new steps')
 
-                # add to electron trajectories
+                # # add to electron trajectories
+                # cube = numpy.zeros((electrons.shape[0], electrons.shape[1] + 1, 2))
+                # cube[:, :len(electrons[0]), :2] = electrons
+                # cube[:, len(electrons[0]):, :2] = walk
+                # electrons = cube
+
                 electrons = numpy.concatenate([electrons, walk], axis=1)
+                # self._time('added to current stash')
 
                 # prune off those that hit the top and bottom
                 electrons = electrons[electrons[:, -1, 1] < self.top]
                 electrons = electrons[electrons[:, -1, 1] > self.bottom]
 
+                # self._time('pruned off top and bottom')
+
                 # prune off those that hit the back
                 electrons = electrons[electrons[:, -1, 0] > self.back]
+
+                # self._time('pruned off back')
 
                 # keep all the electrons that hit the detector but remove from live electrons
                 detections = electrons[electrons[:, -1, 0] > self.screen]
                 electrons = electrons[electrons[:, -1, 0] < self.screen]
+
+                # add to successes
+                successes += len(detections)
+                accumulation += len(detections)
 
                 # cut detections off at the screen
                 if len(detections) > 0:
@@ -683,10 +978,14 @@ class Historian(list):
                     detections[:, -1] = numpy.array([self.screen, self._cross(self.screen, detections[:, -2], detections[:, -1])])
                     [self.append(history) for history in detections]
 
+                # self._time('getting cutoff points')
+
                 # find those that span the divider and remove them
                 spanning = (electrons[:, -2, 0] < self.divider) != (electrons[:, -1, 0] < self.divider)
                 spanners = electrons[spanning]
                 electrons = electrons[~spanning]
+
+                # self._time('finding spanners')
 
                 # find the slopes from the approaching points to all slit edges
                 approaches = []
@@ -697,6 +996,8 @@ class Historian(list):
                     approach = (edge - spanners[:, -2, 1]) / (self.divider - spanners[:, -2, 0])
                     approaches.append(approach)
 
+                # self._time('calculating approaches')
+
                 # find the slopes from the departing points to all slit edges
                 departures = []
                 for edge in edges:
@@ -705,35 +1006,62 @@ class Historian(list):
                     departure = (spanners[:, -1, 1] - edge) / (spanners[:, -1, 0] - self.divider)
                     departures.append(departure)
 
+                # self._time('calculating departures')
+
                 # calculate all differences between departing and approaching slopes (curvatures)
                 curvatures = [numpy.subtract(approach, departure) for approach, departure in zip(approaches, departures)]
+
+                # self._time('calculating curvatures')
 
                 # if the product of all curvatures is negative, the electron went through a slit
                 product = numpy.prod(numpy.vstack(curvatures), axis=0)
                 passers = spanners[product < 0]
 
+                # self._time('found spanners')
+
                 # add passers back to electrons
                 electrons = numpy.concatenate([electrons, passers], axis=0)
 
+                # self._time('concatenating total')
+
             # summarize block
             final = time()
-            percent = round(100 * len(self) / (count * block), 2)
+            emissions = count * block
+            percent = round(100 * accumulation / emissions, 2)
             duration = round((final - start) / 60, 2)
-            rate = round(len(self) / duration, 0)
+            rate = round(accumulation / duration, 0)
             average = round(numpy.average([len(history) for history in self]), 0)
             deviation = round(numpy.std([len(history) for history in self]), 0)
 
             # print results
-            print('{} successful detections out of {} total, or {}%'.format(len(self), count * block, percent))
-            print('took {} minutes, or {} electrons / minute'.format(duration, rate))
-            print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
-
-            # save file
             if count % 100 == 0:
 
+                # prnt
+                print('{} successful detections out of {} total, or {}%'.format(accumulation, emissions, percent))
+                print('took {} minutes, or {} electrons / minute'.format(duration, rate))
+                print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
+
+            # save file
+            if successes > self.wave:
+
+                # get histories
+                histories = []
+                while len(self) > 0:
+
+                    # depopulate
+                    histories.append(self.pop())
+
                 # save file
-                histories = [history.tolist() for history in self]
-                self._dump(histories, 'histories.json')
+                deposit = '{}/histories_{}_{}.json'.format(self.directory, successes, wave)
+                histories = [history.tolist() for history in histories]
+                self._dump(histories, deposit)
+
+                # increase wave
+                wave += 1
+
+                # add to total and reset count
+                total += successes
+                successes = 0
 
         return None
 
@@ -876,14 +1204,16 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        pyplot.savefig('histories.png')
+        deposit = '{}/histories.png'.format(self.directory)
+        pyplot.savefig(deposit)
 
         return
 
 # create instance
-historian = Historian(100000)
+historian = Historian('double', 500000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
-# historian.populate()
-historian.view()
+#historian.spatter()
+#historian.populate()
+#historian.view()
