@@ -8,7 +8,7 @@ import os, sys
 import json
 
 # import time
-from time import time
+from time import time, sleep
 
 # import random
 
@@ -609,7 +609,7 @@ class Historian(list):
             self
         """
 
-        # open up tabulated values
+        # open up tabulated quartile values
         table = self._load('table.json')
 
         # begin the clock and count
@@ -642,15 +642,15 @@ class Historian(list):
             # begin a block of electrons
             electrons = numpy.zeros((block, steps, 2))
 
-            # fill first with source coordinates
-            electrons[:, 0, 0] = numpy.array([self.source[0]] * block)
-            electrons[:, 0, 1] = numpy.array([self.source[1]] * block)
+            # print(electrons.shape)
+
+            # begin each electron at the source
             step = 0
+            electrons[:, 0] = self.source
 
             # self._time('began block')
 
             # propagate electrons until they hit the detector or a wall
-            stones = 0
             while len(electrons) > 0:
 
                 # print(step, len(electrons))
@@ -812,10 +812,11 @@ class Historian(list):
             # print results
             if count % 2 == 0:
 
-                # prnt
+                # pirnt
                 print('{} successful detections out of {} total, or {}%'.format(accumulation, emissions, percent))
                 print('took {} minutes, or {} electrons / minute'.format(duration, rate))
                 print('average steps: {}, with a standard deviation of {}'.format(average, deviation))
+                sleep(2)
 
             # save file
             if successes > self.wave:
@@ -1214,6 +1215,6 @@ historian = Historian('double', 500000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
-#historian.spatter()
+historian.spatter()
 #historian.populate()
 #historian.view()
