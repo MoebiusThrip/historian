@@ -701,7 +701,7 @@ class Historian(list):
                 #     # calculate new zeros
                 #     zeros = self.zero(lengths, quantiles)
 
-                # create set of random ints
+                # create set of random integers to use as indices
                 indices = randint(1001, size=(survivors,))
 
                 # self._time('made random ints')
@@ -712,9 +712,9 @@ class Historian(list):
                 # self._time('checked lengths')
 
                 # make new random walk
-                horizontals = numpy.add(electrons[:, step - 1, 0], numpy.multiply(lengths, cos(angles))).reshape(-1, 1)
-                verticals = numpy.add(electrons[:, step - 1, 1], numpy.multiply(lengths, sin(angles))).reshape(-1, 1)
-                walk = numpy.concatenate([horizontals, verticals], axis=1)
+                horizontals = numpy.add(electrons[:, step - 1, 0], numpy.multiply(lengths, cos(angles)))
+                verticals = numpy.add(electrons[:, step - 1, 1], numpy.multiply(lengths, sin(angles)))
+                #walk = numpy.concatenate([horizontals, verticals], axis=1)
                     #.reshape(-1, 1, 2)
                 #
                 # self._time('made new steps')
@@ -725,7 +725,9 @@ class Historian(list):
                 # cube[:, len(electrons[0]):, :2] = walk
                 # electrons = cube
 
-                electrons[:, step] = walk
+                # add new step
+                electrons[:, step, 0] = horizontals.reshape(1, -1)
+                electrons[:, step, 1] = verticals.reshape(1, -1)
                 # self._time('added to current stash')
 
                 # prune off those that hit the top and bottom
@@ -1211,10 +1213,10 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('double', 500000, 1000)
+historian = Historian('double', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
-historian.spatter()
+# historian.spatter()
 #historian.populate()
 #historian.view()
