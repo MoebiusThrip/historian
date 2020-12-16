@@ -329,7 +329,7 @@ class Historian(list):
 
         return length
 
-    def _time(self, message):
+    def _stamp(self, message):
         """Start timing a block of code, and print results with a message.
 
         Arguments:
@@ -437,14 +437,14 @@ class Historian(list):
             history = [self.source]
             count += 1
 
-            self._time('starting...')
+            self._stamp('starting...')
 
             # random walk until it hits something
             live = True
             keep = False
             while live:
 
-                self._time('starting electron...')
+                self._stamp('starting electron...')
 
                 # generate more random numbers
                 if len(randoms) < 10:
@@ -459,14 +459,14 @@ class Historian(list):
                 index = int(randoms.pop() * 10 ** self.precision)
                 length = table[index]
 
-                self._time('made randoms')
+                self._stamp('made randoms')
 
                 # create new point
                 previous = history[-1]
                 point = (previous[0] + length * cos(angle), previous[1] + length * sin(angle))
                 history.append(point)
 
-                self._time('appened point')
+                self._stamp('appened point')
 
                 # check for hitting top
                 if previous[1] <= self.top <= point[1]:
@@ -506,7 +506,7 @@ class Historian(list):
                     live = False
                     keep = True
 
-                self._time('checked_status')
+                self._stamp('checked_status')
 
             # add history to self if keeping
             if keep:
@@ -623,13 +623,13 @@ class Historian(list):
         total = sum([int(wave.split('_')[1]) for wave in waves if 'png' not in wave])
         wave = len(waves)
 
-        # self._time('begin collection...')
+        # self._stamp('begin collection...')
 
         # repeat until full
         while total < self.electrons:
 
             # print
-            # self._time('spraying {} electrons...'.format(block))
+            # self._stamp('spraying {} electrons...'.format(block))
 
             # increase count
             count += 1
@@ -648,7 +648,7 @@ class Historian(list):
             step = 0
             electrons[:, 0] = self.source
 
-            # self._time('began block')
+            # self._stamp('began block')
 
             # propagate electrons until they hit the detector or a wall
             while len(electrons) > 0:
@@ -681,7 +681,7 @@ class Historian(list):
                 # # create set of lengths all at 1
                 # lengths = numpy.full(survivors, 1.0)
 
-                # self._time('made angles')
+                # self._stamp('made angles')
 
                 # # create set of random quantiles
                 # quantiles = rand(survivors)
@@ -704,12 +704,12 @@ class Historian(list):
                 # create set of random integers to use as indices
                 indices = randint(1001, size=(survivors,))
 
-                # self._time('made random ints')
+                # self._stamp('made random ints')
 
                 # get lengths from table
                 lengths = numpy.array([table[index] for index in indices])
 
-                # self._time('checked lengths')
+                # self._stamp('checked lengths')
 
                 # make new random walk
                 horizontals = numpy.add(electrons[:, step - 1, 0], numpy.multiply(lengths, cos(angles)))
@@ -717,7 +717,7 @@ class Historian(list):
                 #walk = numpy.concatenate([horizontals, verticals], axis=1)
                     #.reshape(-1, 1, 2)
                 #
-                # self._time('made new steps')
+                # self._stamp('made new steps')
 
                 # # add to electron trajectories
                 # cube = numpy.zeros((electrons.shape[0], electrons.shape[1] + 1, 2))
@@ -728,18 +728,18 @@ class Historian(list):
                 # add new step
                 electrons[:, step, 0] = horizontals.reshape(1, -1)
                 electrons[:, step, 1] = verticals.reshape(1, -1)
-                # self._time('added to current stash')
+                # self._stamp('added to current stash')
 
                 # prune off those that hit the top and bottom
                 electrons = electrons[electrons[:, step, 1] < self.top]
                 electrons = electrons[electrons[:, step, 1] > self.bottom]
 
-                # self._time('pruned off top and bottom')
+                # self._stamp('pruned off top and bottom')
 
                 # prune off those that hit the back
                 electrons = electrons[electrons[:, step, 0] > self.back]
 
-                # self._time('pruned off back')
+                # self._stamp('pruned off back')
 
                 # keep all the electrons that hit the detector but remove from live electrons
                 detections = electrons[electrons[:, step, 0] > self.screen]
@@ -756,14 +756,14 @@ class Historian(list):
                     detections[:, step] = numpy.array([self.screen, self._cross(self.screen, detections[:, step - 1], detections[:, step])])
                     [self.append(history[:step + 1]) for history in detections]
 
-                # self._time('getting cutoff points')
+                # self._stamp('getting cutoff points')
 
                 # find those that span the divider and remove them
                 spanning = (electrons[:, step - 1, 0] < self.divider) != (electrons[:, step, 0] < self.divider)
                 spanners = electrons[spanning]
                 electrons = electrons[~spanning]
 
-                # self._time('finding spanners')
+                # self._stamp('finding spanners')
 
                 # find the slopes from the approaching points to all slit edges
                 approaches = []
@@ -774,7 +774,7 @@ class Historian(list):
                     approach = (edge - spanners[:, step - 1, 1]) / (self.divider - spanners[:, step - 1, 0])
                     approaches.append(approach)
 
-                # self._time('calculating approaches')
+                # self._stamp('calculating approaches')
 
                 # find the slopes from the departing points to all slit edges
                 departures = []
@@ -784,23 +784,23 @@ class Historian(list):
                     departure = (spanners[:, step, 1] - edge) / (spanners[:, step, 0] - self.divider)
                     departures.append(departure)
 
-                # self._time('calculating departures')
+                # self._stamp('calculating departures')
 
                 # calculate all differences between departing and approaching slopes (curvatures)
                 curvatures = [numpy.subtract(approach, departure) for approach, departure in zip(approaches, departures)]
 
-                # self._time('calculating curvatures')
+                # self._stamp('calculating curvatures')
 
                 # if the product of all curvatures is negative, the electron went through a slit
                 product = numpy.prod(numpy.vstack(curvatures), axis=0)
                 passers = spanners[product < 0]
 
-                # self._time('found spanners')
+                # self._stamp('found spanners')
 
                 # add passers back to electrons
                 electrons = numpy.concatenate([electrons, passers], axis=0)
 
-                # self._time('concatenating total')
+                # self._stamp('concatenating total')
 
             # summarize block
             final = time()
@@ -871,13 +871,13 @@ class Historian(list):
         total = sum([int(wave.split('_')[1]) for wave in waves if 'png' not in wave])
         wave = len(waves)
 
-        # self._time('begin collection...')
+        # self._stamp('begin collection...')
 
         # repeat until full
         while total < self.electrons:
 
             # print
-            # self._time('spraying {} electrons...'.format(block))
+            # self._stamp('spraying {} electrons...'.format(block))
 
             # increase count
             count += 1
@@ -887,7 +887,7 @@ class Historian(list):
             verticals = numpy.full(block, self.source[1]).reshape(-1, 1)
             electrons = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
 
-            # self._time('began block')
+            # self._stamp('began block')
 
             # propagate electrons until they hit the detector or a wall
             stones = 0
@@ -909,7 +909,7 @@ class Historian(list):
                 # # create set of lengths all at 1
                 # lengths = numpy.full(survivors, 1.0)
 
-                # self._time('made angles')
+                # self._stamp('made angles')
 
                 # # create set of random quantiles
                 # quantiles = rand(survivors)
@@ -932,19 +932,19 @@ class Historian(list):
                 # create set of random ints
                 indices = randint(1001, size=(survivors,))
 
-                # self._time('made random ints')
+                # self._stamp('made random ints')
 
                 # get lengths from table
                 lengths = numpy.array([table[index] for index in indices])
 
-                # self._time('checked lengths')
+                # self._stamp('checked lengths')
 
                 # make new random walk
                 horizontals = numpy.add(electrons[:, -1, 0], numpy.multiply(lengths, cos(angles))).reshape(-1, 1)
                 verticals = numpy.add(electrons[:, -1, 1], numpy.multiply(lengths, sin(angles))).reshape(-1, 1)
                 walk = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
                 #
-                # self._time('made new steps')
+                # self._stamp('made new steps')
 
                 # # add to electron trajectories
                 # cube = numpy.zeros((electrons.shape[0], electrons.shape[1] + 1, 2))
@@ -953,18 +953,18 @@ class Historian(list):
                 # electrons = cube
 
                 electrons = numpy.concatenate([electrons, walk], axis=1)
-                # self._time('added to current stash')
+                # self._stamp('added to current stash')
 
                 # prune off those that hit the top and bottom
                 electrons = electrons[electrons[:, -1, 1] < self.top]
                 electrons = electrons[electrons[:, -1, 1] > self.bottom]
 
-                # self._time('pruned off top and bottom')
+                # self._stamp('pruned off top and bottom')
 
                 # prune off those that hit the back
                 electrons = electrons[electrons[:, -1, 0] > self.back]
 
-                # self._time('pruned off back')
+                # self._stamp('pruned off back')
 
                 # keep all the electrons that hit the detector but remove from live electrons
                 detections = electrons[electrons[:, -1, 0] > self.screen]
@@ -981,14 +981,14 @@ class Historian(list):
                     detections[:, -1] = numpy.array([self.screen, self._cross(self.screen, detections[:, -2], detections[:, -1])])
                     [self.append(history) for history in detections]
 
-                # self._time('getting cutoff points')
+                # self._stamp('getting cutoff points')
 
                 # find those that span the divider and remove them
                 spanning = (electrons[:, -2, 0] < self.divider) != (electrons[:, -1, 0] < self.divider)
                 spanners = electrons[spanning]
                 electrons = electrons[~spanning]
 
-                # self._time('finding spanners')
+                # self._stamp('finding spanners')
 
                 # find the slopes from the approaching points to all slit edges
                 approaches = []
@@ -999,7 +999,7 @@ class Historian(list):
                     approach = (edge - spanners[:, -2, 1]) / (self.divider - spanners[:, -2, 0])
                     approaches.append(approach)
 
-                # self._time('calculating approaches')
+                # self._stamp('calculating approaches')
 
                 # find the slopes from the departing points to all slit edges
                 departures = []
@@ -1009,23 +1009,23 @@ class Historian(list):
                     departure = (spanners[:, -1, 1] - edge) / (spanners[:, -1, 0] - self.divider)
                     departures.append(departure)
 
-                # self._time('calculating departures')
+                # self._stamp('calculating departures')
 
                 # calculate all differences between departing and approaching slopes (curvatures)
                 curvatures = [numpy.subtract(approach, departure) for approach, departure in zip(approaches, departures)]
 
-                # self._time('calculating curvatures')
+                # self._stamp('calculating curvatures')
 
                 # if the product of all curvatures is negative, the electron went through a slit
                 product = numpy.prod(numpy.vstack(curvatures), axis=0)
                 passers = spanners[product < 0]
 
-                # self._time('found spanners')
+                # self._stamp('found spanners')
 
                 # add passers back to electrons
                 electrons = numpy.concatenate([electrons, passers], axis=0)
 
-                # self._time('concatenating total')
+                # self._stamp('concatenating total')
 
             # summarize block
             final = time()
