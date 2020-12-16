@@ -53,7 +53,7 @@ class Historian(list):
         self.directory = directory
 
         # current time
-        self.time = time()
+        self.now = time()
 
         # set number of total electrons to capture
         self.electrons = electrons
@@ -343,8 +343,8 @@ class Historian(list):
         final = time()
 
         # calculate duration and reset time
-        duration = final - self.time
-        self.time = final
+        duration = final - self.now
+        self.now = final
 
         # print duration
         print('took {} seconds.'.format(duration))
