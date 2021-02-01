@@ -253,22 +253,23 @@ class Historian(list):
             None
         """
 
-        # status
-        print('plotting histogram...')
-
-        # plot histogram
+        # make bins
+        self._stamp('making bins...')
         chunk = (self.top - self.bottom) / self.resolution
         bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
 
-        # populate bins\
+        # populate bins
+        self._stamp('populating bins...')
         population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
         #population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
 
         # normalize population
+        self._stamp('normalizing...')
         maximum = max(population)
         population = [entry * 10 / maximum for entry in population]
 
         # plot it
+        self._stamp('plotting...')
         for bin, quantity in zip(bins, population):
 
             # plot the height
@@ -570,6 +571,8 @@ class Historian(list):
         Populates:
             self
         """
+
+        self._stamp('populating...')
 
         # depopulate
         while len(self) > 1:
@@ -1156,11 +1159,15 @@ class Historian(list):
             None
         """
 
+        self._stamp('creating plot...')
+
         # begin plot
         pyplot.clf()
 
         # set resolution
         resolution = resolution or self.resolution
+
+        self._stamp('generating histogram...')
 
         # plot the histograph
         self._graph()
@@ -1168,6 +1175,8 @@ class Historian(list):
         # set trajectory colors
         colors = ['r-', 'b-', 'c-', 'm-']
         highlights = ['w-']
+
+        self._stamp('gathering trajectories...')
 
         # create trajectories for the subset
         trajectories = []
@@ -1189,6 +1198,8 @@ class Historian(list):
 
         # reverse the trajectories to plot highlights last
         trajectories.reverse()
+
+        self._stamp('tracing trajectories....')
 
         # trace the majority of trajectories
         self._trace(trajectories[:-20])
@@ -1218,5 +1229,5 @@ historian.spray()
 # historian.emit()
 # historian.spray()
 # historian.spatter()
-#historian.populate()
-#historian.view()
+historian.populate()
+historian.view()
