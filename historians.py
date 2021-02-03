@@ -243,11 +243,11 @@ class Historian(list):
 
         return None
 
-    def _graph(self):
+    def _graph(self, resolution):
         """Plot the histograph.
 
         Arguments:
-            None
+            resolution: int, number of bins
 
         Returns:
             None
@@ -255,8 +255,8 @@ class Historian(list):
 
         # make bins
         self._stamp('making bins...')
-        chunk = (self.top - self.bottom) / self.resolution
-        bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(self.resolution)]
+        chunk = (self.top - self.bottom) / resolution
+        bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(resolution)]
 
         # populate bins
         self._stamp('populating bins...')
@@ -276,7 +276,7 @@ class Historian(list):
             middle = (bin[0] + bin[1]) / 2
             pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=0.5)
 
-        return None
+            return None
 
     def _ignite(self):
         """Plot the source.
@@ -559,11 +559,11 @@ class Historian(list):
 
         return None
 
-    def populate(self):
+    def populate(self, number=1):
         """Populate with saved histories rather than generating new ones.
 
         Arguments:
-            None
+            number: int, number of files
 
         Returns:
             None
@@ -572,18 +572,17 @@ class Historian(list):
             self
         """
 
-        self._stamp('populating...')
-
         # depopulate
+        self._stamp('populating...')
         while len(self) > 1:
 
             # discard
-            discard = self.pop()
+            self.pop()
 
         # get all histories
         histories = []
         waves = os.listdir(self.directory)
-        waves = [wave for wave in waves if '.png' not in wave]
+        waves = [wave for wave in waves if '.png' not in wave][:number]
         for wave in waves:
 
             # open up histories
@@ -1148,7 +1147,7 @@ class Historian(list):
 
         return None
 
-    def view(self, number=1000, resolution=100):
+    def view(self, number=10, resolution=10):
         """View the histories.
 
         Arguments:
@@ -1159,27 +1158,24 @@ class Historian(list):
             None
         """
 
-        self._stamp('creating plot...')
-
         # begin plot
+        self._stamp('creating plot...')
         pyplot.clf()
 
         # set resolution
         resolution = resolution or self.resolution
 
-        self._stamp('generating histogram...')
-
         # plot the histograph
-        self._graph()
+        self._stamp('generating histogram...')
+        self._graph(resolution)
 
         # set trajectory colors
         colors = ['r-', 'b-', 'c-', 'm-']
         highlights = ['w-']
 
-        self._stamp('gathering trajectories...')
-
         # create trajectories for the subset
         trajectories = []
+        self._stamp('gathering trajectories...')
         for index, history in enumerate(self[:number]):
 
             # use rotating colors for the majority
@@ -1218,7 +1214,7 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        deposit = '{}/histories.png'.format(self.directory)
+        deposit = '{}/histories_{}.png'.format(self.directory, len(self))
         pyplot.savefig(deposit)
 
         return
