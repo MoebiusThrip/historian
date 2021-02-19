@@ -260,8 +260,8 @@ class Historian(list):
 
         # populate bins
         self._stamp('populating bins...')
-        population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
-        #population = [len([member for member in self if bin[0] < self._cross(self.screen, member[0], member[1]) < bin[1]]) for bin in bins]
+        # population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
+        population = [sum([self.distribution(1.0) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
 
         # normalize population
         self._stamp('normalizing...')
@@ -276,7 +276,7 @@ class Historian(list):
             middle = (bin[0] + bin[1]) / 2
             pyplot.plot([self.screen + 1, self.screen + 1 + quantity], [middle, middle], 'g-', linewidth=0.5)
 
-            return None
+        return None
 
     def _ignite(self):
         """Plot the source.
@@ -559,7 +559,7 @@ class Historian(list):
 
         return None
 
-    def populate(self, number=1):
+    def populate(self, number=1000):
         """Populate with saved histories rather than generating new ones.
 
         Arguments:
@@ -937,7 +937,9 @@ class Historian(list):
                 # self._stamp('made random ints')
 
                 # get lengths from table
-                lengths = numpy.array([table[index] for index in indices])
+                #lengths = numpy.array([table[index] for index in indices])
+                lengths = numpy.array([1.0 for index in indices])
+
 
                 # self._stamp('checked lengths')
 
@@ -1147,7 +1149,7 @@ class Historian(list):
 
         return None
 
-    def view(self, number=10, resolution=10):
+    def view(self, number=1000, resolution=100):
         """View the histories.
 
         Arguments:
@@ -1214,13 +1216,15 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        deposit = '{}/histories_{}.png'.format(self.directory, len(self))
+        deposit = '{}/histories_{}_{}.png'.format(self.directory, len(self), resolution)
         pyplot.savefig(deposit)
+
+        self._stamp('{} saved.'.format(deposit))
 
         return
 
 # create instance
-historian = Historian('double', 1000000, 1000)
+historian = Historian('rigid', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
