@@ -62,11 +62,11 @@ class Historian(list):
         self.wave = wave
 
         # set up apparatus
-        self.top = 20
-        self.bottom = -20
+        self.top = 40
+        self.bottom = -40
         self.back = -20
         self.divider = 0
-        self.screen = 20
+        self.screen = 40
         self.source = (-10, 0)
 
         # configure slits
@@ -937,8 +937,8 @@ class Historian(list):
                 # self._stamp('made random ints')
 
                 # get lengths from table
-                #lengths = numpy.array([table[index] for index in indices])
-                lengths = numpy.array([1.0 for index in indices])
+                lengths = numpy.array([table[index] for index in indices])
+                # lengths = numpy.array([1.0 for index in indices])
 
 
                 # self._stamp('checked lengths')
@@ -1224,7 +1224,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('rigid', 1000000, 1000)
+historian = Historian('big', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
