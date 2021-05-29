@@ -71,7 +71,7 @@ class Historian(list):
 
         # configure slits
         self.gap = 0.5
-        self.space = 7
+        self.space = 14
         self.statuses = [status, statusii]
         self.slits = []
         self._configure()
@@ -1224,7 +1224,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('big', 1000000, 1000)
+historian = Historian('spread', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
