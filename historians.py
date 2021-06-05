@@ -559,11 +559,12 @@ class Historian(list):
 
         return None
 
-    def populate(self, number=1000):
+    def populate(self, number=1000, entirety=5):
         """Populate with saved histories rather than generating new ones.
 
         Arguments:
             number: int, number of files
+            entirety: int, number of files to grab in total, otherwise just last steps
 
         Returns:
             None
@@ -583,11 +584,20 @@ class Historian(list):
         histories = []
         waves = os.listdir(self.directory)
         waves = [wave for wave in waves if '.png' not in wave][:number]
-        for wave in waves:
+        for index, wave in enumerate(waves):
 
             # open up histories
             path = '{}/{}'.format(self.directory, wave)
-            histories += self._load(path)
+            quiver = self._load(path)
+
+            # if beyond entirety:
+            if index > entirety:
+
+                # subset to last few paths
+                quiver = [quiver[-10:] for arrow in quiver]
+
+            # add to histories
+            histories += quiver
 
         # repopulate
         [self.append(history) for history in histories]
@@ -1224,7 +1234,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('spread', 1000000, 1000)
+historian = Historian('big', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
