@@ -260,7 +260,7 @@ class Historian(list):
 
         # populate bins
         self._stamp('populating bins...')
-        # population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
+        #population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
         population = [sum([self.distribution(1.0) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
 
         # normalize population
@@ -594,7 +594,7 @@ class Historian(list):
             if index > entirety:
 
                 # subset to last few paths
-                quiver = [quiver[-10:] for arrow in quiver]
+                quiver = [arrow[-10:] for arrow in quiver]
 
             # add to histories
             histories += quiver
@@ -1234,7 +1234,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('big', 1000000, 1000)
+historian = Historian('spread', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
