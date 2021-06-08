@@ -66,12 +66,12 @@ class Historian(list):
         self.bottom = -40
         self.back = -20
         self.divider = 0
-        self.screen = 40
+        self.screen = 60
         self.source = (-10, 0)
 
         # configure slits
         self.gap = 0.5
-        self.space = 14
+        self.space = 25
         self.statuses = [status, statusii]
         self.slits = []
         self._configure()
@@ -1234,7 +1234,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('spread', 1000000, 1000)
+historian = Historian('expansion', 1000000, 1000)
 historian.spray()
 # historian.emit()
 # historian.spray()
