@@ -869,8 +869,9 @@ class Historian(list):
             self
         """
 
-        # open up tabulated values
+        # open up tabulated values and convert to dict
         table = self._load('table.json')
+        table = {index: entry for index, entry in enumerate(table)}
 
         # begin the clock and count
         start = time()
