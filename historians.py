@@ -946,6 +946,8 @@ class Historian(list):
 
                 # self._stamp('made random ints')
 
+                # bottleneck
+
                 # get lengths from table
                 lengths = numpy.array([table[index] for index in indices])
                 # lengths = numpy.array([1.0 for index in indices])
@@ -966,8 +968,14 @@ class Historian(list):
                 # cube[:, len(electrons[0]):, :2] = walk
                 # electrons = cube
 
+                # bottleneck
+
+
                 electrons = numpy.concatenate([electrons, walk], axis=1)
                 # self._stamp('added to current stash')
+
+                # bottleneck
+
 
                 # prune off those that hit the top and bottom
                 electrons = electrons[electrons[:, -1, 1] < self.top]
