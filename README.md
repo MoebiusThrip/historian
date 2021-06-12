@@ -22,7 +22,9 @@ Feynman's method deemphasizes locations reachable on the detector by mixtures of
 
 Suppose there is some medium that randomly affects the motion of the particle, analogous to Brownian Motion.  Unlike Brownian Motion, the probability of these random effects is centered around a Planck unit of action.  Any particular interaction may result in an increase of path length of more than one unit or less than one unit.  But after many such interactions, the path of the particle is likely very close to an integer number of Planck units.  
 
-Therefore, such a medium would produce mainly phase 0 or close to phase 0 paths.  Places on the detector reachable by many phase 0 paths would have a higher probability of being hit.  Places reachable instead by paths of varying phase would be less likely, because only the phase 0 have a high probability.
+Therefore, such a medium would produce mainly phase 0 or close to phase 0 paths.  Places on the detector reachable by many phase 0 paths would have a higher probability of being hit.  Places reachable instead by paths of varying phase would be less likely, because only the phase 0 paths have a high probability.  No particle needs to go through both slits, nor interfere with itself, in order to cause an interference pattern on the detector.  
+
+#### The Experiment
 
 
 
