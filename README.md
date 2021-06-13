@@ -26,5 +26,14 @@ Therefore, such a medium would produce mainly phase 0 or close to phase 0 paths.
 
 #### The Experiment
 
+Each electron is emitted from a point source, and travels one step at a time.  The step is calculated as follows:
+
+- The angle is taken at random
+
+- The length of the step is sampled from a cos^2 distribution centered at 1 and tapering to 0 at 0.5 and 1.5.  The integral of this distribution can be used to calculate the quantile at all distances.  Reversing this function enables a random number from a uniform distribution to get mapped to a step length, such that they will create the distribution.
+
+- If the step takes the electron across a wall or divider boundary, the electron is terminated. 
+
+- At the detector screen, the final step of the electron is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
 
 
