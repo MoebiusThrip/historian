@@ -36,4 +36,6 @@ Each electron is emitted from a point source, and travels one step at a time.  T
 
 - At the detector screen, the final step of the electron is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
 
+#### Results so far
 
+"million_walks.png" shows the latest 
