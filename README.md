@@ -98,20 +98,32 @@ The model for this experiment is unsatisfactory in the following ways:
 
 A successful conceptual model should be able to shed light on the more bizarre of quantum phenomena.  In light of the model presented here, tunneling is simply a matter of Brownian motion kicking the particle beyond where it could go of its own momentum.  Though tunneling is often described as tunneling through a barrier it cannot get over, this is just a metaphor.  There is no barrier to go over.  There is a region of space with higher potential energy that graphically looks like a vertical barrier when plotted with energy on the vertical axis. But physically, the process of going over an energy barrier is really going through some region of space with increased resistance, tunneling or no.
 
-#### But what about nodes?
 
+#### But what about nodes?
 
 Nodes are places with zero predicted particle hits.  In the double slit experiment, opening the second slit seems to place nodes where there were none with one split open.  In other words, locations that were perfectly valid with one slit are suddenly avoided, even though that original slit is still unblocked.
 
 But a node is infinitesimal in width.  Nodes or no, there are no locations of finite width with zero probability for a particle to hit.  What opening the second slit does, however, is allow for many other possible paths.  But these new paths are not necessarilily symmetrically distributed as far as where they lead.  A somewhat likely detector location when one slit is open might not be so likely anymore if most of the new possible paths don't go there.
 
-#### But What About Entanglement?
 
-#### But What About the Uncertainty Principle?
+#### But what about entanglement?
 
-#### But What About the Measurement Paradox?
+Entanglement is often portrayed in a one to one light, as in every particle that is a member of an entangled pair instantly knows about the other once measurement takes place.  However, to my knowledge, the experimental and theoretical predictations are not one to one, but merely better than chance.  The conceptual model proposed here allows for enhanced correlations due to the induced clustering around integer units of action.  Two photons created from one event, for instance, are phase correlated.  They have their staring points at the same location, and on average both will move in 1 h units.  Other properties would also be affected on average in 1 h units, and so there would be a tendency for their properties to be correlated.  But with no communication.  Only because the Brownian motion in the intervening space tends toward 1 h, phase neutral effects.
 
-#### But What About the Observer Effect?
+
+#### But what about the Uncertainty Principle?
+
+In this model, the uncertainty principle is not so abstract, but a direct consequence of constant jostling.  A particle has an exact location and momentum at any time, but part of this momentum is due to the extra, unknown input from Brownian motion.  Several measurements must be taken to pin down the actual momentum.  But of course, this blows the position measurements.  
+
+
+#### But what about the measurement paradox?
+
+In this model, there is no measurement paradox, because the particle has a definite though chaotic path.  The wave function has no physical reality, and only represents a histogram.  Wave function collapse is no more physical then rolling a pair of dice while considering all possible outcomes.  Once the dice lands, you no longer need to think about the histogram of possibilities.  
+
+
+#### But what about the observer effect?
+
+This simulation allows for testing the observer effect as well.  No detection can occur without some kind of interaction.  If this interaction adds a random phase to the particle's path, it would be expected to smear out the interference pattern.  A stronger interaction would be expected to more effectively scatter the phase.  This is why there are both strong and weak measurements that erase the inference pattern to different degrees.
 
 
 #### References
