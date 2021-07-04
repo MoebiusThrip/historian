@@ -47,16 +47,48 @@ This hypothesis is readily testable by simulating these random walks and countin
 
 #### The Experiment
 
-Each electron is emitted from a point source, and travels one step at a time.  The step is calculated as follows:
+Each particle is emitted from a point source, and travels one step at a time.  The step is calculated as follows:
 
 - The angle is taken at random
 
-- The length of the step is sampled from a cos^2 distribution centered at 1 and tapering to 0 at 0.5 and 1.5.  The integral of this distribution can be used to calculate the quantile at all distances.  Reversing this function enables a random number from a uniform distribution to get mapped to a step length, such that they will create the distribution.
+- The length of the step is sampled from the following distribution:
 
-- If the step takes the electron across a wall or divider boundary, the electron is terminated. 
+```buildoutcfg
+p = 2 * cos^2(pi * x)
+```
+- A plot of this distribution can be found in distribution.png.  It is centered at 1 and tapers to zero at 0.5 and 1.5.
 
-- At the detector screen, the final step of the electron is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
+- The integral of this distribution on the interval [0.5, 1.5] is also shown.  The integral is:
 
-#### Results so far
+```buildoutcfg
+q = x - (1/2) + sin(2 * pi * x) / (2 * pi)
+```
 
-"million_walks.png" shows the latest 
+- If it were solvable, the inverse of this integral would be used to map a random number from a uniform distribution to a jag length from the squared cosine distribution given above.  
+
+- Instead, the Newton Rhapson method is used to approximate the solution, and a table with these values is stored at a resolution of 1000 points.  Thus, a random integer is picked between 0 and 1000.  Dividing by 1000 yields a quantile, and the length x at that quantile is taken as the jag length.
+
+- The file "verification.png" shows the histogram of 100,000 random numbers processed in this way, reproducing the cosine squared distribution.
+
+- If a jag takes a particle across a wall or divider boundary, the particle is terminated.  
+
+- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
+
+
+#### Unsolved Issues
+
+
+
+#### But What About Nodes?
+
+#### But What About Entanglement?
+
+#### But What About the Uncertainty Principle?
+
+#### But What About the Measurement Paradox?
+
+#### But What About the Observer Effect?
+
+
+#### References
+
