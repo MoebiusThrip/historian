@@ -129,8 +129,8 @@ This simulation allows for testing the observer effect as well.  No detection ca
 #### References
 
 - Quantum Chemistry, Donald A McQuarrie.
-- QED: The Strange Theory of Matter and Light.  Richard Feynman.
 - Introduction to Quantum Mechanics.  David J. Giffiths.
+- QED: The Strange Theory of Matter and Light.  Richard Feynman.
 
 
 #### Thank you!
