@@ -31,25 +31,19 @@ phi = exp(-i (2 pi) A / h
 
 where A is the path's action, and h is Planck's constant (itself also in units of action).
 
-Any path where A is precisely an integer number of units h will have a phase of 0 degrees.  Likewise, any path where A is halfway between integer values will have a phase of 180 degrees.
+Any path where A is precisely an integer number of units h will have a phase of 0 degrees.  Likewise, any path where A is halfway between integer values will have a phase of 180 degrees.  The path's phase, then, is a kind of counter for the degree to which the path's action is an integer number of Planck units.
 
-Any path made of precisely 1 unit jags will have a phase of 0.  What's more, any path made of jags that on average are 1 unit will also have a phase of 0.
+Any path made of precisely 1 unit jags will have a phase of 0.  What's more, any path made of jags that on average are 1 unit will also have a phase of 0.  Paths with half integer action values would be much less likely.
+
+Imagine somehow being able to account for every single path the particle could take.  The phase 0 paths would be most likely, and especially more likely than the phase 180 paths.  Imagine looking at a spot on the detector, and being able to see all the possible paths that lead to that spot.  If a high proportion of those paths are phase 0 paths, it is a likely place for the particle to go.  If a low proportion of those paths are phase 0 paths, it is a less likely place for the particle to go.
+
+This is the proposed conceptual reason for Feynman's phase based weighting scheme in what is an otherwise standard probability problem.  
 
 
+#### Simulation Results So Far
 
-Feynmans's method calculates the phase of the path from the path's action.  It is a periodic function of the action.  As the action increases, the phase cycles.  Every Planck's constant increase in action results in a complete cycle.  Therefore, the phase is an indicator for partial Planck units of action.  
+This hypothesis is readily testable by simulating these random walks and counting where they land.  The file "million_walks.png" is the result of one million successful random walks.  It is not an interference pattern.  However, it is not not an interference pattern either, as there is indeed a slight but unmistakable concentration between the slits, and the barest hints of nodes to either side. 
 
-A path with integer Planck units of action has phase of 0, no matter how long the actual path is.  A path halfway between integer Planck units of action has a phase of 180.
-
-Therefore, Feynman's method emphasizes locations on the detector where the majority of the paths are phase 0, i.e., reachable by many paths of integer Planck unit action.  
-
-Feynman's method deemphasizes locations reachable on the detector by mixtures of integer and noninteger Planck units of action.  There have phases that cancel out.
-
-#### Working Hypothesis
-
-Suppose there is some medium that randomly affects the motion of the particle, analogous to Brownian Motion.  Unlike Brownian Motion, the probability of these random effects is centered around a Planck unit of action.  Any particular interaction may result in an increase of path length of more than one unit or less than one unit.  But after many such interactions, the path of the particle is likely very close to an integer number of Planck units.  
-
-Therefore, such a medium would produce mainly phase 0 or close to phase 0 paths.  Places on the detector reachable by many phase 0 paths would have a higher probability of being hit.  Places reachable instead by paths of varying phase would be less likely, because only the phase 0 paths have a high probability.  No particle needs to go through both slits, nor interfere with itself, in order to cause an interference pattern on the detector.  
 
 #### The Experiment
 
