@@ -75,11 +75,11 @@ q = x - (1/2) + sin(2 * pi * x) / (2 * pi)
 - At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
 
 
-#### Unresolved issues
+#### Loose ends
 
 The model for this experiment is unsatisfactory in the following ways:
 
-- Obviously, the simulation only produces a subtle interference-ish pattern.  Satisfactory results would need to produce a much larger contrast.  However, there are several parameters at play.  The location of the slits, the distance to the detector, the gap between the slits, these are all free parameters.  Increasing the distance to the back wall has already enhanced the effect compared to smaller setups.  The downside is, of course, longer simulation times.
+- Obviously, the simulation only produces a subtle interference-ish pattern.  Satisfactory results would need to produce much deeper nodes.  However, there are several parameters at play.  The location of the slits, the distance to the detector, the gap between the slits, these are all free parameters.  Increasing the distance to the back wall has already enhanced the effect compared to smaller setups.  The downside is, of course, longer simulation times.
 
 - Feynman's integral assumes a flat detector.  However, there is no gaurantee that a random walk path will land precisely at the detector.  Essentially, only paths that exactly hit the detector should really count.  In order to mimic this effect, the final jag is cut when it meets the detector.  The length of this cut determines the weighting for the path as a whole.  Thus, paths that most closely land on the detector are given a higher weight than those 1/2 h away.  For convenience, the same cosine squared distribution is used for this as well, but with no justification.
 
