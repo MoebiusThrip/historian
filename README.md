@@ -137,9 +137,7 @@ In this model, there is no measurement paradox, because the particle has a defin
 
 Of course, the double slit experiment encompasses more than just interference patterns.  The interference goes away upon placing a detector at one slit.
 
-But no detection occurs without interaction, likely with some exchange of momentum.  The particle going through the detected slit is no longer traveling at precisely the same velocity it was before.  Therefore, 1 plancksworth of action is now a different distance, smearing the effect.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.
-
-Simulations are planned testing for this effect.
+But no detection occurs without interaction, likely with some exchange of momentum.  The particle going through the detected slit is no longer traveling at precisely the same velocity it was before.  Therefore, 1 unit of action is now a different distance, smearing the pattern.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  This simulation should be able to test for this effect as well, by altering the characteristic distance once crossing a detected slit.
 
 
 #### References
