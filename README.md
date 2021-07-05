@@ -36,7 +36,7 @@ Any path where A is precisely an integer number of units h will have a phase of 
 Consider a particle with mass m and constant velocity v, traveling a distant d.   It spends an amount of time t with kinetic energy K.  Absent any forces, the path's action is:
 
 ```buildoutcfg
-A = K t = (mv^2 / 2) (d / v) = mvd / 2 
+A = K t = (m v^2 / 2) (d / v) = m v d / 2 
 ```
 
 1 Planck's constant worth of action is equivalent to a certain distance:
@@ -47,44 +47,44 @@ d = 2 A / mv = 2 h / mv
 
 Any path made of precisely 1 unit jags will have a phase of 0.  What's more, any path made of many jags that on average are 1 unit jags will also have a phase of 0.  Paths that deviate from this average will have a phase that deviates from 0. 
 
-Imagine somehow being able to account for every single random walk path the particle could take from the source to every spot on the detector.  Some paths would have many jags that deviate from 1.  Some paths would have few jags that deviate from 1.  If jags of 1 are most likely, then phase 0 paths are also most likely.  The particles would have a tendency to take phase 0 paths, and hit the detector in spots where a high proportion of phase 0 paths lead.
+Imagine somehow being able to account for every single random walk path the particle could take from the source to every spot on the detector.  Some paths would have many jags that deviate from 1.  Some paths would have few jags that deviate from 1.  If jags of 1 are most likely, then phase 0 paths are also most likely.  The particles would have a tendency to take phase 0 paths, and hit the detector in spots where phase 0 paths congregate.
 
 This is the proposed conceptual reason behind Feynman's phase based weighting scheme in what is an otherwise standard probability problem.  
 
 
 #### Simulation results so far
 
-This hypothesis is readily testable by simulating these random walks and counting where they land.  The file "million_walks.png" is the result of one million successful random walks.  It is not an interference pattern.  However, it is not not an interference pattern either.  There is indeed a slight but unmistakable concentration between the slits, and the barest hints of nodes to either side. 
+This hypothesis is readily testable by simulating these random walks.  The file million_walks.png is the result of one million random walks that successfully hit the detector screen.  It is not an interference pattern.  However, it is not not an interference pattern either.  There is indeed a slight but unmistakable concentration between the slits, and hints of nodes to either side. 
 
 
-#### The experiment
+#### Simulation conditions
 
-Each particle is emitted from a point source, and travels one step at a time.  The step is calculated as follows:
+Each particle begins its history at a point source, and travels one step at a time.  The step is calculated as follows:
 
-- The angle is taken at random
+- The angle is taken at random.
 
 - The length of the step is sampled from the following distribution:
 
 ```buildoutcfg
-p = 2 * cos^2(pi * x)
+p = 2 cos^2(pi x)
 ```
 - A plot of this distribution can be found in distribution.png.  It is centered at 1 and tapers to zero at 0.5 and 1.5.
 
 - The integral of this distribution on the interval [0.5, 1.5] is also shown.  The integral is:
 
 ```buildoutcfg
-q = x - (1/2) + sin(2 * pi * x) / (2 * pi)
+q = - 1 / 2 + x + sin(2 pi x) / (2 pi)
 ```
 
-- If it were solvable, the inverse of this integral would be used to map a random number from a uniform distribution to a jag length from the squared cosine distribution given above.  
+- If it were solvable, the inverse of this integral would be used to map a random number from a uniform distribution to a jag length from the given probability distribution.  
 
-- Instead, the Newton Rhapson method is used to approximate the solution, and a table with these values is stored at a resolution of 1000 points.  Thus, a random integer is picked between 0 and 1000.  Dividing each by 1000 yields a quantile, and the length x at that quantile is taken as the jag length.
+- Instead, the Newton Raphson method is used to approximate the solution, and a table with these values is stored at a resolution of 1000 points.  Thus, a random integer is picked between 0 and 1000.  Dividing each by 1000 yields a quantile, and the length x at that quantile is taken as the jag length.
 
-- The file "verification.png" shows the histogram of 100,000 random numbers processed in this way, reproducing the cosine squared distribution.
+- The file verification.png shows the histogram of 100,000 random numbers processed in this way, reproducing the probability distribution.
 
-- If a jag takes a particle across a wall or divider boundary, the particle is terminated.  
+- The particle is terminated if a jag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
 
-- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the cos^2 distribution to get a weighting factor for the path. 
+- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the probability distribution to get a weighting factor, and this is added to the growing histogram. 
 
 
 #### Loose ends
