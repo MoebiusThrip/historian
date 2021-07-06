@@ -101,6 +101,7 @@ The model for this simulation is unsatisfactory in the following ways:
 
 - Feynman's method treats all phases equally.  Really it is the difference in phase between histories that matters.  The model presented here, however, treats phase 0 and phase 180 paths very differently.  This is a noted conceptual mismatch.  For instance, the distance from the source to the detector is an integer number of units, and might be biasing the results.  A successful model should produce a center concentration no matter the distance to the detector.  This is yet to be tested.  
 
+- There is also a lack of direction in this model.  Since each step is random, there is no pervading velocity.  It effectively is a diffusion based model.  If each random jag is an additive component to a path in a particular direction, instead of the full story, this might resolve the other two issues above as well. 
 
 ### But what about tunneling?
 
