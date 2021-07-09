@@ -101,7 +101,8 @@ The model for this simulation is unsatisfactory in the following ways:
 
 - Feynman's method treats all phases equally.  Really it is the difference in phase between histories that matters.  The model presented here, however, treats phase 0 and phase 180 paths very differently.  This is a noted conceptual mismatch.  For instance, the distance from the source to the detector is an integer number of units, and might be biasing the results.  A successful model should produce a center concentration no matter the distance to the detector.  This is yet to be tested.  
 
-- There is also a lack of direction in this model.  Since each step is random, there is no pervading velocity.  It effectively is a diffusion based model.  There must be some contribution to the pervading direction from particles's velocity. If each random jag is an additive component to a path in a particular direction, instead of the full story, this might resolve the other two issues above as well.  The question is how to combine the two components in a meaningful way.
+- There is also a lack of direction in this model.  Since each step is random, there is no pervading velocity.  It effectively is a diffusion based model.  There must be some contribution to the pervading direction from particles's velocity. If each random jag is an additive component to a path in a particular direction, instead of the full story, this might resolve the other issues above as well.  I suspect the path of minimum action provides the arbitrary additive constant needed to make the model phase symmetric.  There are plans to test this in the next simulation.
+
 
 ### But what about tunneling?
 
@@ -138,14 +139,14 @@ In this model, there is no measurement paradox, because the particle has a defin
 
 Of course, the double slit experiment encompasses more than just interference patterns.  The interference goes away upon placing a detector at one slit.
 
-But no detection occurs without interaction, likely with some exchange of momentum.  The particle going through the detected slit is no longer traveling at precisely the same velocity it was before.  Therefore, 1 unit of action is now a different distance, smearing the pattern.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  This simulation should be able to test for this effect as well, by altering the characteristic distance once crossing a detected slit.
+But no detection occurs without interaction, likely with some exchange of momentum.  The particle going through the detected slit is no longer traveling at precisely the same velocity it was before.  Therefore, 1 unit of action is now a different distance, smearing the pattern.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this.
 
 
 #### References
 
-- Quantum Chemistry, Donald A McQuarrie.
-- Introduction to Quantum Mechanics.  David J. Giffiths.
 - QED: The Strange Theory of Matter and Light.  Richard Feynman.
+- Quantum Chemistry, Donald A McQuarrie.
+- Introduction to Quantum Mechanics.  David J. Griffiths.
 
 
 #### Thank you!
