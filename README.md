@@ -11,7 +11,7 @@ The source of this Brownian motion is taken to be the very vacuum fluctuations t
 
 A particle therefore does not take a straight trajectory, but is chaotically jostled, and the path the particle takes is a jagged, unpredictable affair.  A pollen grain in water moves in a similarly jagged and chaotic manner.
 
-The twist here is that the Brownian motion has some springiness to it, such that the jag length is symmetrically distributed around 1 Planck's constant's worth of action.
+The twist here is that the Brownian motion has some springiness to it, such that the jag lengths are symmetrically distributed around 1 Planck's constant's worth of action.
 
 
 ### Motivation
@@ -49,12 +49,12 @@ Any path made of precisely 1 unit jags will have a phase of 0.  What's more, any
 
 Imagine somehow being able to account for every single random walk path the particle could take from the source to every spot on the detector.  Some paths would have many jags that deviate from 1.  Some paths would have few jags that deviate from 1.  If jags of 1 are most likely, then phase 0 paths are also most likely.  The particles would have a tendency to take phase 0 paths, and hit the detector in spots where phase 0 paths congregate.
 
-This is the proposed conceptual reason behind Feynman's phase based weighting scheme in what is an otherwise standard probability problem.  
+This is the conceptual reason proposed here behind Feynman's phase based weighting scheme in what is an otherwise standard probability problem.  
 
 
 #### Simulation results so far
 
-This hypothesis is readily testable by simulating these random walks.  The file million_walks.png is the result of one million random walks that successfully hit the detector screen.  It is not an interference pattern.  However, it is not not an interference pattern either.  There is indeed a slight but unmistakable concentration between the slits, and hints of nodes to either side. 
+This hypothesis is readily testable by simulating random walks.  The file million_walks.png is the result of one million random walks that successfully hit the detector screen.  It is not an interference pattern.  However, it is not not an interference pattern either.  There is indeed a slight but unmistakable concentration between the slits, and hints of nodes to either side. 
 
 
 #### Simulation conditions
