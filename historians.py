@@ -527,7 +527,7 @@ class Historian(list):
                 if len(detections) > 0:
 
                     # determine cutoff point and append
-                    detections[:, -1] = numpy.array([self.screen, detections[:, -1, 1]])
+                    detections[:, -1, 0] = self.screen
                     [self.append(history) for history in detections]
 
                 # find those that span the divider and remove them
@@ -801,7 +801,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('momentum', 10, 10)
+historian = Historian('momentum', 1000, 1000)
 historian.spray()
 historian.populate()
 historian.view()
