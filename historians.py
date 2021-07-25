@@ -508,8 +508,8 @@ class Historian(list):
                 lengths = rand(survivors) * self.momentum
 
                 # create classical steps toward screen
-                horizontals = numpy.add(electrons[:, -1, 0], lengths.reshape(-1, 1))
-                verticals = electrons[:, -1, 1]
+                horizontals = numpy.add(electrons[:, -1, 0], lengths).reshape(-1, 1)
+                verticals = electrons[:, -1, 1].reshape(-1, 1)
                 classicals = numpy.concatenate([horizontals, verticals], axis=1).reshape(-1, 1, 2)
 
                 # add to electron trajectories
@@ -533,6 +533,9 @@ class Historian(list):
                 # find those that span the divider and remove them
                 spanning = (electrons[:, -2, 0] < self.divider) != (electrons[:, -1, 0] < self.divider)
                 electrons = electrons[~spanning]
+
+                # recount number of surviving electrons
+                survivors = len(electrons)
 
                 # create set of random angles for qantum paths
                 angles = rand(survivors) * 2 * pi
