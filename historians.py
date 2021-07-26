@@ -80,7 +80,7 @@ class Historian(list):
         self._configure()
 
         # use weighting at detector screen?
-        self.weightings = False
+        self.weightings = True
 
         # set histogram resolution
         self.resolution = 10000
