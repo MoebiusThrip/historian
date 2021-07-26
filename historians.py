@@ -69,8 +69,8 @@ class Historian(list):
         self.divider = 40
         self.screen = 140
 
-        # set stir
-        self.stir = 0.5
+        # set clarity
+        self.clarity = 0.5
 
         # configure slits
         self.gap = 0.5
@@ -522,8 +522,8 @@ class Historian(list):
                 # count number of surviving electrons
                 survivors = len(electrons)
 
-                # create set of random lengths, with maximum set by stir parameter
-                lengths = rand(survivors) * self.stir
+                # create set of random lengths, with maximum set by clarity parameter
+                lengths = rand(survivors) * self.clarity
 
                 # create classical steps toward screen
                 horizontals = numpy.add(electrons[:, -1, 0], lengths).reshape(-1, 1)
