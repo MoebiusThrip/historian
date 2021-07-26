@@ -56,18 +56,18 @@ class Historian(list):
         self.now = time()
 
         # set number of total electrons to capture
-        self.electrons = electrons
+        self.electrons = int(electrons)
 
         # set number of electrons per wave
-        self.wave = wave
+        self.wave = int(wave)
 
         # set up apparatus
         self.top = 40
         self.bottom = -40
-        self.back = -10
+        self.back = -20
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 140
+        self.screen = 100
 
         # set clarity
         self.clarity = 0.5
@@ -75,7 +75,7 @@ class Historian(list):
         # configure slits
         self.gap = 0.5
         self.space = 25
-        self.statuses = [status, statusii]
+        self.statuses = [bool(status), bool(statusii)]
         self.slits = []
         self._configure()
 
