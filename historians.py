@@ -35,11 +35,13 @@ class Historian(list):
         list
     """
 
-    def __init__(self, directory, electrons=100, wave=10000, status=True, statusii=True):
+    def __init__(self, directory='testo', electrons=10, wave=1000, status=True, statusii=True):
         """Initialize a historian instance.
 
         Arguments:
+            directory: str, name of directory off root to place files
             electrons: int, number of successful electrons
+            wave: int, number of electrons per file
             status: boolean, first slit open?
             statusii: boolean, second slit open?
 
@@ -67,8 +69,8 @@ class Historian(list):
         self.divider = 40
         self.screen = 140
 
-        # set momentum
-        self.momentum = 0.5
+        # set stir
+        self.stir = 0.5
 
         # configure slits
         self.gap = 0.5
@@ -520,8 +522,8 @@ class Historian(list):
                 # count number of surviving electrons
                 survivors = len(electrons)
 
-                # create set of random lengths, with maximum set by momentum parameter
-                lengths = rand(survivors) * self.momentum
+                # create set of random lengths, with maximum set by stir parameter
+                lengths = rand(survivors) * self.stir
 
                 # create classical steps toward screen
                 horizontals = numpy.add(electrons[:, -1, 0], lengths).reshape(-1, 1)
@@ -816,8 +818,21 @@ class Historian(list):
 
         return
 
-# create instance
-historian = Historian('momentum', 100000, 1000)
-historian.spray()
-historian.populate()
-historian.view()
+
+# set up main function to run from command line
+if __name__ == '__main__':
+
+    # grab arguments
+    arguments = [argument for argument in sys.argv[1:]]
+
+    # create instance
+    historian = Historian(*arguments)
+
+    # spray until enough electrons hit detector
+    historian.spray()
+
+    # gather all histories
+    historian.populate()
+
+    # tally histogram and plot
+    historian.view()
