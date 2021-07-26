@@ -385,13 +385,13 @@ class Historian(list):
 
     def _weigh(self, member):
 
-        # set default weight to the destribution at lenght 1
+        # set default weight to the destribution at length 1
         weight = self.distribution(1.0)
 
-        # if the step is non classical and weightings is set
-        if weighting and member[-1][1] != member[-2][1]:
+        # if the leg is non classical (not strictly horizontal) and weightings is set
+        if self.weightings and member[-1][1] != member[-2][1]:
 
-            # measure the length of the step and apply distribution
+            # measure the length of the leg and apply distribution
             length = self._measure(member[-1], member[-2])
             weight = self.distribution(length)
 
