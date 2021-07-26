@@ -62,13 +62,13 @@ class Historian(list):
         # set up apparatus
         self.top = 40
         self.bottom = -40
-        self.back = -20
+        self.back = -10
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 80
+        self.screen = 140
 
         # set momentum
-        self.momentum = 0.1
+        self.momentum = 0.5
 
         # configure slits
         self.gap = 0.5
@@ -76,6 +76,9 @@ class Historian(list):
         self.statuses = [status, statusii]
         self.slits = []
         self._configure()
+
+        # use weighting at detector screen?
+        self.weightings = False
 
         # set histogram resolution
         self.resolution = 10000
@@ -259,10 +262,9 @@ class Historian(list):
         chunk = (self.top - self.bottom) / resolution
         bins = [(self.bottom + index * chunk, self.bottom + (index + 1) * chunk) for index in range(resolution)]
 
-        # populate bins
+        # populate bins according to weighting scheme (-2 before (?))
         self._stamp('populating bins...')
-        #population = [sum([self.distribution(self._measure(member[-1], member[-2])) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
-        population = [sum([self.distribution(1.0) for member in self if bin[0] <= member[-2][1] < bin[1]]) for bin in bins]
+        population = [sum([self._weigh(member) for member in self if bin[0] <= member[-1][1] < bin[1]]) for bin in bins]
 
         # normalize population
         self._stamp('normalizing...')
@@ -380,6 +382,20 @@ class Historian(list):
             pyplot.plot(horizontals, verticals, color, alpha=opacity, linewidth=0.5)
 
         return None
+
+    def _weigh(self, member):
+
+        # set default weight to the destribution at lenght 1
+        weight = self.distribution(1.0)
+
+        # if the step is non classical and weightings is set
+        if weighting and member[-1][1] != member[-2][1]:
+
+            # measure the length of the step and apply distribution
+            length = self._measure(member[-1], member[-2])
+            weight = self.distribution(length)
+
+        return weight
 
     def distribute(self):
         """Plot the distribution functions.
@@ -801,7 +817,7 @@ class Historian(list):
         return
 
 # create instance
-historian = Historian('momentum', 1000, 1000)
+historian = Historian('momentum', 100000, 1000)
 historian.spray()
 historian.populate()
 historian.view()
