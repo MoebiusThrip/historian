@@ -744,7 +744,7 @@ class Historian(list):
 
         return None
 
-    def view(self, number=1000, resolution=100):
+    def view(self, number=1000, resolution=128):
         """View the histories.
 
         Arguments:
