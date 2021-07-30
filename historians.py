@@ -64,10 +64,10 @@ class Historian(list):
         # set up apparatus
         self.top = 40
         self.bottom = -40
-        self.back = -20
+        self.back = -10
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 100
+        self.screen = 140
 
         # set clarity
         self.clarity = 0.5
