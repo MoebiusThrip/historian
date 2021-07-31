@@ -103,28 +103,28 @@ That being said, the weighting function is critical to extract the pattern.  Wit
 
 The model for this simulation is unsatisfactory in a couple of ways:
 
-- Obviously, so far the simulation has only produced a subtle interference-ish pattern.  Satisfactory results would need to produce much deeper nodes.  However, there are several parameters at play.  The location of the slits, the distance to the detector, the gap between the slits, the frequency of zags, the zag distribution function, the detection weighting function, these are all free parameters.  Currently running simulations are exploring this parameter space.
+Obviously, so far the simulation has only produced a subtle interference-ish pattern.  Satisfactory results would need to produce much deeper nodes.  However, there are several parameters at play.  The location of the slits, the distance to the detector, the gap between the slits, the frequency of zags, the zag distribution function, the detection weighting function, these are all free parameters.  Currently running simulations are exploring this parameter space.
 
-- Feynman's integral assumes a flat detector, and only integrates to this distance.  However, there is no guarantee that a random walk path will land precisely at the detector screen.  Essentially, only paths that exactly hit the detector should really count, as otherwise they are outside of Feynman's histories.  In order to mimic this effect, the final zag is cut where it meets the detector.  The length of this cut determines the weighting for the history as a whole, as described above.  This is pretty ad hoc, and it will here be noted that without weighting the histories in this way, a very ordinary gaussian distribution appears in the histogram.  
+Feynman's integral assumes a flat detector, and only integrates to this distance.  However, there is no guarantee that a random walk path will land precisely at the detector screen.  Essentially, only paths that exactly hit the detector should really count, as otherwise they are outside of Feynman's histories.  In order to mimic this effect, the final zag is cut where it meets the detector.  The length of this cut determines the weighting for the history as a whole, as described above.  This is pretty ad hoc, and it will here be noted that without weighting the histories in this way, a very ordinary gaussian distribution appears in the histogram.  
 
-- However, this still serves to highlight that random walks produced in this way lead to a phase based distribution at the detector.  In other words, there are indeed locations where in phase paths congregate.
+However, this still serves to highlight that random walks produced in this way lead to a phase based distribution at the detector.  In other words, there are indeed locations where in phase paths congregate.
 
-- The cosine squared distribution is convenient, as it is has an analytic integral and has zeros at well defined locations.  This is also a natural choice, as wave equations produce sine waves that then get squared for probability distributions.  However, ideally the pool of possible histories should be the same as Feynman's pool.  Because no zag is less than 1/2 unit, not every Feynman path is represented.  Originally the simulation was meant to use a gaussian distribution around 1 instead, but it was less convenient to work worth.  The most appropriate distribution to use is an open question at this point.
+The cosine squared distribution is convenient, as it is has an analytic integral and has zeros at well defined locations.  This is also a natural choice, as wave equations produce sine waves that then get squared for probability distributions.  However, ideally the pool of possible histories should be the same as Feynman's pool.  Because no zag is less than 1/2 unit, not every Feynman path is represented.  Originally the simulation was meant to use a gaussian distribution around 1.0 instead, but it was less convenient to work worth because its integral is not analytic.  The most appropriate distribution to use is an open question at this point.
 
 
 ### Further Speculations
 
-A successful conceptual model should also be able to shed light on the more counter intuitive quantum phenomena.  For example, what about tunneling?
+A successful conceptual model should also be able to shed light on the other counter intuitive quantum phenomena.  For example, what about tunneling?
 
 
 #### What about tunneling?
 
-In light of the model presented here, tunneling is simply a matter of Brownian motion kicking the particle beyond where it could go of its own momentum.  Though tunneling is often depicted as tunneling through a barrier it cannot get over, this is just a metaphor.  Tunneling does not represent an alternative path, but rather further along the same path.  There is no barrier to go "over", it is always a matter of going "through".  There is a region of space with higher potential energy that graphically looks like a vertical barrier when plotted with energy on the vertical axis. But physically, the process of going over an energy barrier is really going through some region of space with increased resistance.  Tunneling need not represent some exotic path, only the same path with an extra kick behind it.
+In light of the model presented here, tunneling is simply a matter of Brownian motion kicking the particle beyond where it could go of its own momentum.  Though tunneling is often depicted as tunneling through a barrier instead of over, this is just a metaphor.  Tunneling does not represent an alternative path, but rather further along the same path.  There is no barrier to go "over", it is always a matter of going "through".  There is a region of space with higher potential energy that graphically looks like a vertical barrier when plotted with energy on the vertical axis. But physically, the process of going over an energy barrier is really going through some region of space with increased resistance.  Tunneling need not represent some exotic path, only the same path with an extra kick behind it.
 
 
 #### But what about nodes?
 
-Nodes are places with zero predicted particle hits.  In the double slit experiment, opening the second slit seems to place nodes where there were none with one split open.  In other words, locations that were perfectly valid with one slit open are suddenly avoided, even though that original slit is still unblocked.
+Nodes are places with zero predicted particle hits.  In the double slit experiment, opening the second slit seems to place nodes where there were none with one slit open.  In other words, locations that were perfectly valid with one slit open are suddenly avoided, even though that original slit is still unblocked.
 
 But a node is infinitesimal in width.  Nodes or no, there are no locations of finite width with zero probability for a particle to hit.  What opening the second slit does, is allow for many new possible paths.  These new paths are not necessarily symmetrically distributed as far as where they land.  A somewhat likely detector location when one slit is open might not be so likely anymore if there are many new available paths and most of them don't go there.
 
@@ -133,28 +133,37 @@ But a node is infinitesimal in width.  Nodes or no, there are no locations of fi
 
 Entanglement is often portrayed in a one to one light, as if every particle that is a member of an entangled pair instantly knows about the other once measurement takes place.  However, to the best of my knowledge, the experimental and theoretical predictions are much more modest, merely a better than chance correlation.  
 
-The conceptual model proposed here allows for enhanced correlations due to the induced clustering around integer units of action.  Two photons created from one event, for instance, are phase correlated.  They have their starting points at the same location, and on average both will move in 1 h units.  Thus, they maintain correlated probability distributions without needing to communicate.  The assumption is that other particle properties could also be jostled around, yet maintain the correlation as well.
+The conceptual model proposed here allows for enhanced correlations due to the induced clustering around integer units of action.  Two photons created from one event, for instance, are phase correlated.  They have their starting points at the same location, and on average both will move in 1 h units.  Thus, they maintain correlated probability distributions without needing to communicate.  It is really a matter of the law of averages.  Any particular measurement has a fairly wide range of possible values, but as an accumulation there is a stable and unshakable correlation at 1 unit intervals.
 
-Any particular measurement is chancy and uncertain, but the average over many measurement is well defined and correlated.
+The assumption here is that other particle properties are also jostled about on average in 1 unit hits as well.  Any particular measurement is chancy and uncertain, but the average over many measurements is well defined and correlated across vast distances if no other interactions take place.   
+
+The actual nature of this Brownian Motion is of course uncertain.  But the point is that particles need do no such thing as go everywhere all at once in order to act as if they do.  There is a temptation to call this Bohmian Motion, as really it is pilot wave theory with no actual pilot required.
 
 
 #### But what about the Uncertainty Principle?
 
-In this model, the uncertainty principle is not so abstract, but a direct consequence of constant jostling.  A particle has an exact location and momentum at any time, but part of this momentum is due to the extra, unknown input from Brownian motion.  Several measurements must be taken to pin down the actual momentum.  But of course, this blows the position measurements.  
+In this model, the uncertainty principle is not so abstract, but a direct consequence of constant jostling.  A particle has an exact location and momentum at any time, but part of this momentum is due to the extra, unknown input from Bohmian motion.  Several measurements must be taken to pin down the actual momentum.  But of course, this blows the position measurements.  
+
+The point is that the particles are allowed to act as if they have hidden variables.  The hidden variables, however, are stored in the vacuum itself and not on the particle.  The vacuum provides localized kicks that need no communication with each other for long range effects.  They must simply all act according to the same probability distribution.  
+
+It is noteworthy that Brownian motion was an inspiration for 
+Feynman's sum over all histories to begin with.  It is also noteworthy that the Schroedinger Equation itself is really a dffusion equation, with a periodic twist granted by the imaginary i. 
 
 
 #### But what about the measurement paradox?
 
 In this model, there is no measurement paradox, because the particle has a definite though chaotic history.  The wave function has no physical reality, and only represents a histogram.  Wave function collapse is no more physical then rolling a pair of dice while considering all possible outcomes.  Before the dice land, the histogram is the best basis for predicting the results.  But physically it is still particular dice in particular orientations the entire time.  The results appear to be guided by the histogram because after many rolls they will indeed do so.  But nobody would argue that before the dice landed they were just a histogram.  
 
+Wave particle duality as well is resolved because the particle is always a particle.  Note that this says nothing about the true structure of particle, as this might very well be a wave like disturbance in a field, or something altogether different.  But conceptually, jittery but well defined particle paths are sufficient for counter intuitive effects.
+
 
 #### But what about the observer effect?
 
-Of course, the double slit experiment encompasses more than just interference patterns.  The interference goes away upon placing a detector at one slit.
+Of course, the double slit experiment encompasses more than just interference patterns.  The interference goes away upon placing a detector at one slit.  The eraser puts it back.
 
-But no detection occurs without interaction, likely with some exchange of momentum or subtle reflection.  Despite phase being a quantum property, the quantum level jostling makes no change to the phase on averaage.  It is only classical motion that actually changes the phase.  Think of the wave function for a bound state, such as the Hydrogen atom.  The phase only changes in the classical region around the nucleus where the kinetic energy is positive.  Far from the nucleus, the kinetic energy is negative, and the wave function is an ordinary decaying exponential.  
+But no detection occurs without interaction, likely with some exchange of momentum or subtle but non integer addition to the path.  Despite phase being a quantum property, the quantum level jostling makes no change to the phase on average.  It is only classical motion that actually changes the phase.  Think of the wave function for a bound state, such as the hydrogen atom.  The phase only changes in the classical region around the nucleus where the kinetic energy is positive.  Far from the nucleus, the kinetic energy is negative, and the wave function is an ordinary decaying exponential.  
 
-Therefore, a classical interaction at the slit can disrupt the phase relationships, smearing out the interference.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this effect.
+Therefore, a classical interaction at the slit can disrupt the phase relationships, smearing out the interference.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this effect and others.
 
 
 ### References
