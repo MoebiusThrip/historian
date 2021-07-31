@@ -47,7 +47,7 @@ A = K t = (m v^2 / 2) (d / v) = m v d / 2
 
 Consider the path of a particle flying towards a screen that measures 100.1 pw.  Consider a slightly different path that measures 101.1 pw.  Both these paths would have a phase of 36 degrees.  They are "in phase".
 
-Consider a third path that measures 61543009.1 pw.  Also 36 degrees and also in phase.  In fact, adding any integer number of planksworths retains the in phase relationship.  Adding any number of zigzags of precisely one planksworth keeps the paths in phase.
+Consider a third path that measures 61543009.1 pw.  Also 36 degrees and also in phase.  In fact, adding any integer number of plankworths retains the in phase relationship.  Adding any number of zigzags of precisely one planksworth keeps the paths in phase.
 
 What's more, adding any number of zigzags, whose average length is one planksworth will tend to maintain the in phase relationship, especially once the number of zigzags is large.
 
@@ -63,7 +63,11 @@ This hypothesis is readily testable by simulating these random walks.  The file 
 
 #### Simulation conditions
 
-Each particle begins its history at a point source, and travels one step at a time.  The step is calculated as follows:
+Each particle begins its history at a point source, and travels one zigzag at a time.  The zigzag is calculated in two parts:
+
+- The first step is a zig.  It represents classical motion towards the detection screen along a straight path.  The length of this path is taken to be random.  In practical terms, this means picking a random number from a uniform distribution up to some maximum length, say 0.5 planckworths.
+
+- The second step is a zag.  It represents the quantum component, and is calculated in a more complicated way.
 
 - The angle is taken at random.
 
@@ -80,15 +84,15 @@ p = 2 cos^2(pi x)
 q = - 1 / 2 + x + sin(2 pi x) / (2 pi)
 ```
 
-- If it were solvable, the inverse of this quantile function would be used to map a random number from a uniform distribution to a jag length from the given probability distribution.  
+- If it were solvable, the inverse of this quantile function would be used to map a random number from a uniform distribution to a zag length from the given probability distribution.  
 
-- Instead, the Newton Raphson method is used to approximate the solution, and a table with these values is stored at a resolution of 1000 points.  A random integer is picked between 0 and 1000.  Dividing each by 1000 yields a quantile, and the length x at that quantile is taken as the jag length.
+- Instead, the Newton Raphson method is used to approximate the solution, and a table with these values is stored at a resolution of 1000 points.  A random integer is picked between 0 and 1000.  Dividing each by 1000 yields a quantile, and the length x at that quantile is taken as the zag length.
 
 - The file verification.png shows the histogram of 100,000 random numbers processed in this way, reproducing the probability distribution.
 
-- The particle is terminated if a jag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
+- The particle is terminated if a zig or zag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
 
-- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary.  The length of this step is plugged into the probability distribution to get a weighting factor, and this is added to the growing histogram. 
+- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  A zig is granted full weight no matter how long. 
 
 
 #### Loose ends
