@@ -92,7 +92,7 @@ q = - 1 / 2 + x + sin(2 pi x) / (2 pi)
 
 - The particle is terminated if a zig or zag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
 
-- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  A zig is granted full weight no matter how long. 
+- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  A zig is granted full weight no matter how long, as the distribution of zig lengths is taken to be uniform. 
 
 
 #### Loose ends
