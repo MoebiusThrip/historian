@@ -150,7 +150,7 @@ Of course, the double slit experiment encompasses more than just interference pa
 
 But no detection occurs without interaction, likely with some exchange of momentum or subtle reflection.  Despite phase being a quantum property, the quantum level jostling makes no change to the phase on averaage.  It is only classical motion that actually changes the phase.  Think of the wave function for a bound state, such as the Hydrogen atom.  The phase only changes in the classical region around the nucleus where the kinetic energy is positive.  Far from the nucleus, the kinetic energy is negative, and the wave function is an ordinary decaying exponential.  
 
-Therefore, a classical interaction with a slit detector can disrupt the phase relationships, smearing out the interference.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this effect.
+Therefore, a classical interaction at the slit can disrupt the phase relationships, smearing out the interference.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this effect.
 
 
 ### References
