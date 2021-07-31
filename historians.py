@@ -516,7 +516,7 @@ class Historian(list):
         """
 
         # open up tabulated values and convert to dict
-        table = self._load('table.json')
+        table = self._load('tables/table.json')
         table = {index: entry for index, entry in enumerate(table)}
 
         # begin the clock and count
@@ -836,7 +836,7 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        deposit = '{}/histories_{}_{}.png'.format(self.directory, len(self), resolution)
+        deposit = 'gallery/{}_{}_{}.png'.format(self.directory.split('/')[-1], len(self), resolution)
         pyplot.savefig(deposit)
 
         self._stamp('{} saved.'.format(deposit))
