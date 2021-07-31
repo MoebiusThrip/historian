@@ -90,14 +90,18 @@ Instead, the Newton Raphson method is used to approximate the solution, and a ta
 
 The file verification.png shows the histogram of 100,000 random numbers processed in this way, reproducing the probability distribution.
 
-- The particle is terminated if a zig or zag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
+The particle is terminated if a zig or zag takes the particle across a wall or divider boundary, unless it crosses the divider at the location of the slits.
 
-- At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  A zig is granted full weight no matter how long, as the distribution of zig lengths is taken to be uniform. 
+At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final zag is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  For instance, a leftover bit of 0.1 pw means the path got very close to the detector, and is granted a higher weight than a path fully 0.5 pw off.  If it is a zig that crosses the detector it is granted full weight no matter how long, as the distribution of zig lengths is taken to be uniform. 
+
+The cosine squared distribution is currently used to enact this weighting, because it conveniently extends the same zag length distribution centered at 1.0 to the same centered at 0.0.  However, at this stage both functions are somewhat free parameters and need not be the same function because they serve different roles.  
+
+That being said, the weighting function is critical to extract the pattern.  Without the weighting function the histograms look like combinations of typical gaussians.
 
 
 ### Loose ends
 
-The model for this simulation is unsatisfactory in the following ways:
+The model for this simulation is unsatisfactory in a couple of ways:
 
 - Obviously, so far the simulation has only produced a subtle interference-ish pattern.  Satisfactory results would need to produce much deeper nodes.  However, there are several parameters at play.  The location of the slits, the distance to the detector, the gap between the slits, the frequency of zags, the zag distribution function, the detection weighting function, these are all free parameters.  Currently running simulations are exploring this parameter space.
 
