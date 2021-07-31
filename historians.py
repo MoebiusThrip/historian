@@ -51,6 +51,7 @@ class Historian(list):
 
         # set current directory
         self.directory = directory
+        self._make(directory)
 
         # current time
         self.now = time()
@@ -318,6 +319,30 @@ class Historian(list):
             contents = json.load(pointer)
 
         return contents
+
+    def _make(self, folder):
+        """Make a folder in the directory if not yet made.
+
+        Arguments:
+            folder: str, directory path
+
+        Returns:
+            None
+        """
+
+        # try to
+        try:
+
+            # create the directory
+            os.mkdir(folder)
+
+        # unless directory already exists, or none was given
+        except (FileExistsError, FileNotFoundError, PermissionError):
+
+            # in which case, nevermind
+            pass
+
+        return None
 
     def _measure(self, point, pointii):
         """Measure the distance between two points.

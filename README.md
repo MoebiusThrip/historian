@@ -21,7 +21,7 @@ Feynman's method of summing over all histories is analogous to a typical probabi
 However, Feynman's method does not simply add the counts together. Instead it weighs each path by the path's "phase".  This detail causes counter intuitive predictions that are nevertheless born out by experiment to astounding accuracy.
 
 
-#### But what is phase?
+### But what is phase?
 
 Feynman calculates the phase for a particular path in the following way:
 
@@ -56,12 +56,12 @@ Imagine you are approaching a row of empty chairs, seeking one in which to sit. 
 This is the proposed connection with the Feynman weighting scheme.  There are some places on the detection screen that are simply easier to get to than others.  Paths that are in phase are compatible with each other, because unit zigzags are easy.  Feynman's method picks out the locations on the detector most easily reachable by random zigzags of unit steps.
 
 
-#### Simulation results so far
+### Simulation results so far
 
 This hypothesis is readily testable by simulating these random walks.  The file million_walks.png is the latest result of one million random walks that successfully hit the detector screen.  Certainly it is not an obvious interference pattern.  And yet I daresay there is a hint...
 
 
-#### Simulation conditions
+### Simulation conditions
 
 Each particle begins its history at a point source, and travels one zigzag at a time.  The zigzag is calculated in two parts:
 
@@ -95,7 +95,7 @@ q = - 1 / 2 + x + sin(2 pi x) / (2 pi)
 - At the detector screen, the final step of the particle is unlikely to line up exactly with the detector.  Therefore, the final step is chopped off at the detector boundary, and the detection is weighed based on the likelihood of a zag that length.  A zig is granted full weight no matter how long, as the distribution of zig lengths is taken to be uniform. 
 
 
-#### Loose ends
+### Loose ends
 
 The model for this simulation is unsatisfactory in the following ways:
 
@@ -112,9 +112,12 @@ The model for this simulation is unsatisfactory in the following ways:
 - There is also a lack of direction in this model.  Since each step is random, there is no pervading velocity.  It effectively is a diffusion based model.  There must be some contribution to the pervading direction from particles's velocity. If each random jag is an additive component to a path in a particular direction, instead of the full story, this might resolve the other issues above as well.  I suspect the path of minimum action provides the arbitrary additive constant needed to make the model phase symmetric.  There are plans to test this in the next simulation.
 
 
-### But what about tunneling?
+### Further Speculations
 
 A successful conceptual model should be able to shed light on the more counter intuitive quantum phenomena.  For example, what about tunneling?
+
+
+#### What about tunneling?
 
 In light of the model presented here, tunneling is simply a matter of Brownian motion kicking the particle beyond where it could go of its own momentum.  Though tunneling is often described as tunneling through a barrier it cannot get over, this is just a metaphor.  There is no barrier to go "over", it is always a matter of going "through".  There is a region of space with higher potential energy that graphically looks like a vertical barrier when plotted with energy on the vertical axis. But physically, the process of going over an energy barrier is really going through some region of space with increased resistance.  Tunneling need not represent some exotic path, only the same path with extra kick behind it.
 
@@ -150,11 +153,22 @@ Of course, the double slit experiment encompasses more than just interference pa
 But no detection occurs without interaction, likely with some exchange of momentum.  The particle going through the detected slit is no longer traveling at precisely the same velocity it was before.  Therefore, 1 unit of action is now a different distance, smearing the pattern.  This is why there are weak measurements that disturb the interference pattern less and strong measurements that disturb the pattern more.  Upcoming simulations are planned to test this.
 
 
-#### References
+### References
 
 - QED: The Strange Theory of Matter and Light.  Richard Feynman.
 - Quantum Chemistry, Donald A McQuarrie.
 - Introduction to Quantum Mechanics.  David J. Griffiths.
+
+
+### Running the script
+
+The script is presently in a state of flux, however feel free to try it out if you like.  A simulation may be run from the commandline using the following:
+
+```buildoutcfg
+$ python historians.py directory electrons
+```
+
+where "directory" is the name of a folder for storing the results, and "electrons" is the number of total successfully detected electrons.  Results are saved periodically, and the simulation may be stopped and restarted at will.  
 
 
 #### Thank you!
