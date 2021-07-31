@@ -1,6 +1,6 @@
 # Historian
 
-Historian is a python script meant to simulate the double slit experiment using mildly constrained random walks.
+Historian is a python script meant to simulate the double slit experiment using guided random walks.
 
 
 ### Working hypothesis
@@ -9,16 +9,16 @@ The interference patterns from the double slit experiment are conceptually expla
 
 The source of this Brownian motion is taken to be the very vacuum fluctuations that are standard quantum lore.  Here this notion is considered literally, and the vacuum is imagined as a chaotic sea of sorts that buffets the particles about.
 
-A particle therefore does not take a straight trajectory, but is chaotically jostled, and the path the particle takes is a jagged, unpredictable affair.  A pollen grain in water moves in a similarly jagged and chaotic manner.
+A particle therefore does not take a straight trajectory, but is chaotically jostled, and the path the particle takes is a zigzagged, unpredictable affair.  A pollen grain in water moves in a similarly zigzagged and chaotic manner.
 
-The twist here is that the Brownian motion has some springiness to it, such that the jag lengths are symmetrically distributed around 1 Planck's constant's worth of action.
+The twist here is that the Brownian motion has some springiness to it, such that very small zigzag lengths are not as likely as zigzags some distance away.
 
 
 ### Motivation
 
 Feynman's method of summing over all histories is analogous to a typical probability problem.  Figure out all the different paths that can be taken and where they end up.  Count these.  The result is a histogram showing the relative probability of a particle ending up in a particular place.
 
-However, Feynman's method does not simply add the counts together. Instead he weighs each path by the path's "phase".  This detail causes counter intuitive predictions that are nevertheless born out by experiment to astounding accuracy.
+However, Feynman's method does not simply add the counts together. Instead it weighs each path by the path's "phase".  This detail causes counter intuitive predictions that are nevertheless born out by experiment to astounding accuracy.
 
 
 #### But what is phase?
@@ -31,30 +31,34 @@ phi = exp(-i (2 pi) A / h
 
 where A is the path's action, and h is Planck's constant (also in units of action).
 
-Any path where A is precisely an integer number of units h will have a phase of 0 degrees.  Likewise, any path where A is halfway between integer values will have a phase of 180 degrees.  The path's phase, then, is a kind of indicator for the degree to which the path's action is an integer number of Planck units.
+Despite its mysterious connotations the imaginary i in the exponent simply describes a periodic function.  Any path where A is precisely an integer number of units h will have a phase of 0 degrees.  Likewise, any path where A is halfway between integer values will have a phase of 180 degrees.  The path's phase, then, represents the remainder after accounting for all full Planck's constant's worth of action.
 
-Consider a particle with mass m and constant velocity v, traveling a distant d.   It spends an amount of time t with kinetic energy K.  Absent any forces, the path's action is:
+Consider a particle with mass m and constant velocity v, traveling a distance d.   It spends an amount of time t with kinetic energy K.  Absent any forces, the path's action is:
 
 ```buildoutcfg
 A = K t = (m v^2 / 2) (d / v) = m v d / 2 
 ```
 
-1 Planck's constant worth of action is equivalent to a certain distance:
+1 plancksworth of action is equivalent to a certain distance:
 
 ```buildoutcfg
-d = 2 A / mv = 2 h / mv
+1 pw = 2 A / m v = 2 h / m v
 ```
 
-Any path made of precisely 1 unit jags will have a phase of 0.  What's more, any path made of many jags that on average are 1 unit jags will also have a phase of 0.  Paths that deviate from this average will have a phase that deviates from 0. 
+Consider the path of a particle flying towards a screen that measures 100.1 pw.  Consider a slightly different path that measures 101.1 pw.  Both these paths would have a phase of 36 degrees.  They are "in phase".
 
-Imagine somehow being able to account for every single random walk path the particle could take from the source to every spot on the detector.  Some paths would have many jags that deviate from 1.  Some paths would have few jags that deviate from 1.  If jags of 1 are most likely, then phase 0 paths are also most likely.  The particles would have a tendency to take phase 0 paths, and hit the detector in spots where phase 0 paths congregate.
+Consider a third path that measures 61543009.1 pw.  Also 36 degrees and also in phase.  In fact, adding any integer number of planksworths retains the in phase relationship.  Adding any number of zigzags of precisely one planksworth keeps the paths in phase.
 
-This is the conceptual reason proposed here behind Feynman's phase based weighting scheme in what is an otherwise standard probability problem.  
+What's more, adding any number of zigzags, whose average length is one planksworth will tend to maintain the in phase relationship, especially once the number of zigzags is large.
+
+Imagine you are approaching a row of empty chairs, seeking one in which to sit.  Now imagine your feet are strapped into a snowboard.  Now imagine you are drunk, and really need to sit down.  It may not be obvious from far away, but no matter how you stumble about there will be certain chairs that are easier to get to.  A chair next to an easy chair will likely not be an easy chair, rather the easy chairs will be spaced at intervals in accordance with the size of your snowboard. 
+
+This is the proposed connection with the Feynman weighting scheme.  There are some places on the detection screen that are simply easier to get to than others.  Paths that are in phase are compatible with each other, because unit zigzags are easy.  Feynman's method picks out the locations on the detector most easily reachable by random zigzags of unit steps.
 
 
 #### Simulation results so far
 
-This hypothesis is readily testable by simulating random walks.  The file million_walks.png is the result of one million random walks that successfully hit the detector screen.  It is not an interference pattern.  However, it is not not an interference pattern either.  There is indeed a slight but unmistakable concentration between the slits, and hints of nodes to either side. 
+This hypothesis is readily testable by simulating these random walks.  The file million_walks.png is the latest result of one million random walks that successfully hit the detector screen.  Certainly it is not an obvious interference pattern.  And yet I daresay there is a hint...
 
 
 #### Simulation conditions
