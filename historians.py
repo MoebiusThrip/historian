@@ -808,7 +808,7 @@ class Historian(list):
                 color = highlights[index]
 
             # use an exponential for quickly decaying opacity
-            opacity = min([1.0, exp(-0.2 * index) + 0.01])
+            opacity = min([1.0, exp(-0.1 * index) + 0.01])
 
             # add to the trajectory
             trajectory = (history, color, opacity)
