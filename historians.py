@@ -68,10 +68,10 @@ class Historian(list):
         self.back = -10
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 120
+        self.screen = 100
 
         # set clarity
-        self.clarity = 0.5
+        self.clarity = 0.2
 
         # configure slits
         self.gap = 1.0
@@ -769,7 +769,7 @@ class Historian(list):
 
         return None
 
-    def view(self, number=1000, resolution=128):
+    def view(self, number=5000, resolution=128):
         """View the histories.
 
         Arguments:
