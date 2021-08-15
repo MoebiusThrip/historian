@@ -71,10 +71,10 @@ class Historian(list):
         self.screen = 100
 
         # set clarity
-        self.clarity = 0.2
+        self.clarity = 0.14
 
         # configure slits
-        self.gap = 1.0
+        self.gap = 0.7
         self.space = 25
         self.statuses = [bool(status), bool(statusii)]
         self.slits = []
