@@ -68,7 +68,7 @@ class Historian(list):
         self.back = -20
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 80
+        self.screen = 100
 
         # set clarity
         self.clarity = 0.15
