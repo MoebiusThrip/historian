@@ -65,17 +65,17 @@ class Historian(list):
         # set up apparatus
         self.top = 40
         self.bottom = -40
-        self.back = -10
+        self.back = -20
         self.source = (0, 0)
         self.divider = 40
-        self.screen = 100
+        self.screen = 80
 
         # set clarity
         self.clarity = 0.15
 
         # configure slits
         self.gap = 1.0
-        self.space = 25
+        self.space = 40
         self.statuses = [bool(status), bool(statusii)]
         self.slits = []
         self._configure()
