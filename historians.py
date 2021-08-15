@@ -71,7 +71,7 @@ class Historian(list):
         self.screen = 100
 
         # set clarity
-        self.clarity = 0.1
+        self.clarity = 0.15
 
         # configure slits
         self.gap = 1.0
