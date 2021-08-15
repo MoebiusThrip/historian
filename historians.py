@@ -75,7 +75,7 @@ class Historian(list):
 
         # configure slits
         self.gap = 1.0
-        self.space = 40
+        self.space = 25
         self.statuses = [bool(status), bool(statusii)]
         self.slits = []
         self._configure()
