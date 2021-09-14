@@ -71,7 +71,7 @@ class Historian(list):
         self.screen = 100
 
         # set clarity
-        self.clarity = 0.15
+        self.clarity = 0.10
 
         # configure slits
         self.gap = 1.0
@@ -527,7 +527,7 @@ class Historian(list):
 
         # scan all files in directory
         waves = os.listdir(self.directory)
-        total = sum([int(wave.split('_')[1]) for wave in waves if 'png' not in wave])
+        total = sum([int(wave.split('_')[2]) for wave in waves if 'png' not in wave])
         wave = len(waves)
 
         # repeat until full
@@ -679,7 +679,7 @@ class Historian(list):
                     histories.append(self.pop())
 
                 # save file
-                deposit = '{}/histories_{}_{}.json'.format(self.directory, successes, wave)
+                deposit = '{}/histories_{}_{}.json'.format(self.directory, wave, successes)
                 histories = [history.tolist() for history in histories]
                 self._dump(histories, deposit)
 
