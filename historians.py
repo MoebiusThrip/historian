@@ -528,7 +528,7 @@ class Historian(list):
 
         # scan all files in directory
         waves = os.listdir(self.directory)
-        total = sum([int(wave.split('_')[2]) for wave in waves if 'png' not in wave])
+        total = sum([int(wave.split('_')[2].split('.')[0]) for wave in waves if 'png' not in wave])
         wave = len(waves)
 
         # repeat until full
