@@ -478,6 +478,7 @@ class Historian(list):
         # get all histories
         histories = []
         waves = os.listdir(self.directory)
+        waves.sort(reverse=True)
         waves = [wave for wave in waves if '.png' not in wave][:number]
         for index, wave in enumerate(waves):
 
