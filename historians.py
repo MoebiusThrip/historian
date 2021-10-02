@@ -71,7 +71,7 @@ class Historian(list):
         self.screen = 100
 
         # set clarity
-        self.clarity = 0.5
+        self.clarity = 0.2
 
         # configure slits
         self.gap = 0.5
@@ -478,7 +478,7 @@ class Historian(list):
         # get all histories
         histories = []
         waves = os.listdir(self.directory)
-        #waves.sort(reverse=True)
+        waves.sort(reverse=True)
         waves = [wave for wave in waves if '.png' not in wave][:number]
         for index, wave in enumerate(waves):
 
