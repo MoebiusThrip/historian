@@ -680,7 +680,7 @@ class Historian(list):
                     histories.append(self.pop())
 
                 # save file
-                deposit = '{}/histories_{}_{}.json'.format(self.directory, wave, successes)
+                deposit = '{}/histories_{}_{}.json'.format(self.directory, str(wave).zfill(4), successes)
                 histories = [history.tolist() for history in histories]
                 self._dump(histories, deposit)
 
