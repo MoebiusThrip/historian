@@ -283,15 +283,15 @@ class Historian(list):
         if self.mode == 'cycloid':
 
             # define probability distribution functions
-            self.distribution = lambda x:  2 * cos(pi * x) ** 2
-            self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
+            self.distribution = lambda t:  (25 / (4 * pi)) * (1 + cos(t))
+            self.quantile = lambda t: (1 / pi) * ((1 / 2) - sin(2 * t) / 4 - pi / 2)
 
             # prepare functions for newton-rhapson
-            self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
-            self.slope = lambda x, q: 1 + cos(2 * pi * x)
+            self.zero = lambda t, q: (1 / pi) * ((1 / 2) - sin(2 * t) / 4 - pi / 2) - q
+            self.slope = lambda t, q: (1 / pi) * (-cos(2 * t) / 4)
 
             # add coda
-            self.coda = lambda x: x
+            self.coda = lambda t: (4/ 25) * (t - sin(t))
 
         return None
 
