@@ -95,6 +95,8 @@ class Historian(list):
         self.slope = None
         self.coda = None
         self.inverse = None
+        self.zeroii = None
+        self.slopeii = None
         self._formulate()
 
         return
@@ -185,11 +187,13 @@ class Historian(list):
 
         return None
 
-    def _crank(self, quantile, guess=1.0, tolerance=1e-14):
+    def _crank(self, quantile, zero, slope, guess=1.0, tolerance=1e-14):
         """Crank through Newton Rhapson to solve the quantile equation for a segment length.
 
         Arguments:
             quantile: float, the quantile to pinpoint
+            zero: function object
+            slope: function object
             guess=1.0: float, initial guess
             tolerance=1e-12: tolerance for closesness to zero
 
@@ -198,8 +202,8 @@ class Historian(list):
         """
 
         # evaluate the function
-        evaluation = self.zero(guess, quantile)
-        derivative = self.slope(guess, quantile)
+        evaluation = zero(guess, quantile)
+        derivative = slope(guess, quantile)
 
         # while the function evaluates to outside the tolerance
         while abs(evaluation) > tolerance:
@@ -208,8 +212,8 @@ class Historian(list):
             guess = guess - evaluation / derivative
 
             # evaluate the function
-            evaluation = self.zero(guess, quantile)
-            derivative = self.slope(guess, quantile)
+            evaluation = zero(guess, quantile)
+            derivative = slope(guess, quantile)
 
         return guess
 
@@ -485,6 +489,8 @@ class Historian(list):
         # get horizontal points
         chunk = 0.01
         horizontals = [number * chunk + 0.5 for number in range(101)]
+
+        # convert to parameterization
 
         # calculate functions
         distributions = numpy.array([self.coda(self.distribution(horizontal)) for horizontal in horizontals])
@@ -769,7 +775,7 @@ class Historian(list):
                 print('calculating quantile {} of {}'.format(index, len(quantiles)))
 
             # calculate length and make a string
-            length = self._crank(quantile, guess=1.0, tolerance=tolerance)
+            length = self._crank(quantile, self.zero, self.slope, guess=1.0, tolerance=tolerance)
             lengths.append(length)
 
         # store lengths indexed by 10^precision * quantile
