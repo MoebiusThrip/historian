@@ -1,8 +1,5 @@
 # historians.py for the historian class to keep track of particle histories
 
-# import reload
-from importlib import reload
-
 # import system tools
 import os, sys
 import json
@@ -35,13 +32,14 @@ class Historian(list):
         list
     """
 
-    def __init__(self, directory='testo', electrons=10, wave=1000, status=True, statusii=True):
+    def __init__(self, directory='testo', electrons=10, wave=1000, mode='sin2', status=True, statusii=True):
         """Initialize a historian instance.
 
         Arguments:
             directory: str, name of directory off root to place files
             electrons: int, number of successful electrons
             wave: int, number of electrons per file
+            mode: str: distribution mode
             status: boolean, first slit open?
             statusii: boolean, second slit open?
 
@@ -89,13 +87,14 @@ class Historian(list):
         # set tabulation precision
         self.precision = 3
 
-        # define probability distribution functions
-        self.distribution = lambda x:  2 * cos(pi * x) ** 2
-        self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
-
-        # prepare functions for newton-rhapson
-        self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
-        self.slope = lambda x, q: 1 + cos(2 * pi * x)
+        # define probability distribution
+        self.mode = mode
+        self.distribution = None
+        self.quantile = None
+        self.zero = None
+        self.slope = None
+        self.coda = None
+        self._distribute()
 
         return
 
@@ -229,6 +228,52 @@ class Historian(list):
         height = point[0][1] * (pointii[0][0] - horizontal) + pointii[0][1] * (horizontal - point[0][0]) / (pointii[0][0] - point[0][0])
 
         return height
+
+    def _distribute(self):
+        """Define distribution functions.
+
+        Arguments:
+            mode: str,  particular mode
+
+        Returns:
+            None
+
+        Populates:
+            self.distribution
+            self.quantile
+            self.zero
+            self.slope
+        """
+
+        # define sin^2 distribution functions
+        if self.mode == 'sin2':
+
+            # define probability distribution functions
+            self.distribution = lambda x:  2 * cos(pi * x) ** 2
+            self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
+
+            # prepare functions for newton-rhapson
+            self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
+            self.slope = lambda x, q: 1 + cos(2 * pi * x)
+
+            # add coda
+            self.coda = lambda x: x
+
+        # define sin^2 distribution functions
+        if self.mode == 'cycloid':
+
+            # define probability distribution functions
+            self.distribution = lambda x:  2 * cos(pi * x) ** 2
+            self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
+
+            # prepare functions for newton-rhapson
+            self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
+            self.slope = lambda x, q: 1 + cos(2 * pi * x)
+
+            # add coda
+            self.coda = lambda x: x
+
+        return None
 
     def _dump(self, contents, deposit):
         """Dump a dictionary into a json file.
@@ -517,7 +562,7 @@ class Historian(list):
         """
 
         # open up tabulated values and convert to dict
-        table = self._load('tables/table.json')
+        table = self._load('tables/table_{}.json'.format(self.mode))
         table = {index: entry for index, entry in enumerate(table)}
 
         # begin the clock and count
@@ -725,7 +770,7 @@ class Historian(list):
             lengths.append(length)
 
         # store lengths indexed by 10^precision * quantile
-        self._dump(lengths, 'table.json')
+        self._dump(lengths, 'tables/table_{}.json'.format(self.mode))
 
         return None
 
@@ -740,7 +785,7 @@ class Historian(list):
         """
 
         # load in table
-        table = self._load('table.json')
+        table = self._load('tables/table_{}.json'.format(self.mode))
 
         # find all lengths based on random number selection
         lengths = [table[str(round(random(), 3))] for _ in range(trials)]
