@@ -294,7 +294,7 @@ class Historian(list):
 
             # define probability distribution functions
             self.distribution = lambda t:  (25 / (4 * pi)) * (1 + cos(t))
-            self.quantile = lambda t: (1 / pi) * ((1 / 2) - sin(2 * t) / 4 - pi / 2)
+            self.quantile = lambda t: (1 / pi) * ((1 - pi) / 2 - (sin(2 * t) / 4))
 
             # prepare functions for newton-rhapson
             self.zero = lambda t, q: (1 / pi) * ((1 / 2) - sin(2 * t) / 4 - pi / 2) - q
@@ -511,6 +511,8 @@ class Historian(list):
         # plot functions
         pyplot.plot(horizontals, distributions, 'b--')
         pyplot.plot(horizontals, quantiles, 'g--')
+
+        pyplot.plot(horizontals, parameterization, 'r--')
 
         # save figure
         pyplot.savefig('verifications/distribution_{}.png'.format(self.mode))
