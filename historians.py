@@ -94,7 +94,7 @@ class Historian(list):
         self.zero = None
         self.slope = None
         self.coda = None
-        self._distribute()
+        self._formulate()
 
         return
 
@@ -229,7 +229,27 @@ class Historian(list):
 
         return height
 
-    def _distribute(self):
+    def _dump(self, contents, deposit):
+        """Dump a dictionary into a json file.
+
+        Arguments:
+            contents: dict
+            deposit: str, deposit file path
+
+        Returns:
+            None
+        """
+
+        # dump file
+        print('dumping into {}...'.format(deposit))
+        with open(deposit, 'w') as pointer:
+
+            # dump contents
+            json.dump(contents, pointer)
+
+        return None
+
+    def _formulate(self):
         """Define distribution functions.
 
         Arguments:
@@ -272,26 +292,6 @@ class Historian(list):
 
             # add coda
             self.coda = lambda x: x
-
-        return None
-
-    def _dump(self, contents, deposit):
-        """Dump a dictionary into a json file.
-
-        Arguments:
-            contents: dict
-            deposit: str, deposit file path
-
-        Returns:
-            None
-        """
-
-        # dump file
-        print('dumping into {}...'.format(deposit))
-        with open(deposit, 'w') as pointer:
-
-            # dump contents
-            json.dump(contents, pointer)
 
         return None
 
@@ -495,7 +495,7 @@ class Historian(list):
         pyplot.plot(horizontals, quantiles, 'g--')
 
         # save figure
-        pyplot.savefig('distribution.png')
+        pyplot.savefig('verifications/distribution_{}.png'.format(self.mode))
 
         return None
 
@@ -788,7 +788,7 @@ class Historian(list):
         table = self._load('tables/table_{}.json'.format(self.mode))
 
         # find all lengths based on random number selection
-        lengths = [table[str(round(random(), 3))] for _ in range(trials)]
+        lengths = [table[int(random() * 1000)] for _ in range(trials)]
 
         # bin them to draw a histogram
         middles, heights = self._bin(lengths, resolution=100, start=0.5, finish=1.5)
@@ -811,7 +811,7 @@ class Historian(list):
         pyplot.plot(horizontals, distributions, 'b--')
 
         # save fig
-        pyplot.savefig('verification.png')
+        pyplot.savefig('verifications/verification_{}.png'.format(self.mode))
 
         return None
 
@@ -882,7 +882,7 @@ class Historian(list):
         pyplot.gca().set_yticks([])
 
         # save
-        deposit = 'gallery/{}_{}_{}.png'.format(self.directory.split('/')[-1], len(self), resolution)
+        deposit = 'experiments/{}_{}_{}.png'.format(self.directory.split('/')[-1], len(self), resolution)
         pyplot.savefig(deposit)
 
         self._stamp('{} saved.'.format(deposit))
