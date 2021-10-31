@@ -285,7 +285,11 @@ class Historian(list):
             self.coda = lambda x: x
             self.inverse = lambda x: x
 
-        # define sin^2 distribution functions
+            # add newtton rhpapson parameters
+            self.zeroii = lambda x: x
+            self.slopeii = lambda x: x
+
+        # define cycloid distribution functions
         if self.mode == 'cycloid':
 
             # define probability distribution functions
@@ -299,6 +303,10 @@ class Historian(list):
             # add coda
             self.coda = lambda t: (4/ 25) * (t - sin(t))
             self.inverse = lambda x: x
+
+            # add coda newton parameterrs
+            self.zeroii = lambda x, q: (4 / 25) * (x - sin(x)) - q
+            self.slopeii = lambda x, q: (4 / 25) * (1 - cos(x))
 
         return None
 
@@ -491,10 +499,11 @@ class Historian(list):
         horizontals = [number * chunk + 0.5 for number in range(101)]
 
         # convert to parameterization
+        parameterization = [self._crank(horizontal, self.zeroii, self.slopeii) for horizontal in horizontals]
 
         # calculate functions
-        distributions = numpy.array([self.coda(self.distribution(horizontal)) for horizontal in horizontals])
-        quantiles = numpy.array([self.coda(self.quantile(horizontal)) for horizontal in horizontals])
+        distributions = numpy.array([self.distribution(horizontal) for horizontal in parameterization])
+        quantiles = numpy.array([self.quantile(horizontal) for horizontal in parameterization])
 
         # set up plot
         pyplot.clf()
