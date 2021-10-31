@@ -94,6 +94,7 @@ class Historian(list):
         self.zero = None
         self.slope = None
         self.coda = None
+        self.inverse = None
         self._formulate()
 
         return
@@ -278,6 +279,7 @@ class Historian(list):
 
             # add coda
             self.coda = lambda x: x
+            self.inverse = lambda x: x
 
         # define sin^2 distribution functions
         if self.mode == 'cycloid':
@@ -292,6 +294,7 @@ class Historian(list):
 
             # add coda
             self.coda = lambda t: (4/ 25) * (t - sin(t))
+            self.inverse = lambda x: x
 
         return None
 
@@ -484,8 +487,8 @@ class Historian(list):
         horizontals = [number * chunk + 0.5 for number in range(101)]
 
         # calculate functions
-        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
-        quantiles = numpy.array([self.quantile(horizontal) for horizontal in horizontals])
+        distributions = numpy.array([self.coda(self.distribution(horizontal)) for horizontal in horizontals])
+        quantiles = numpy.array([self.coda(self.quantile(horizontal)) for horizontal in horizontals])
 
         # set up plot
         pyplot.clf()
