@@ -188,7 +188,7 @@ class Historian(list):
 
         return None
 
-    def _crank(self, quantile, zero, slope, guess=1.0, tolerance=1e-14):
+    def _crank(self, quantile, zero, slope, guess=1.0, trials=5, tolerance=1e-14):
         """Crank through Newton Rhapson to solve the quantile equation for a segment length.
 
         Arguments:
@@ -196,14 +196,15 @@ class Historian(list):
             zero: function object
             slope: function object
             guess=1.0: float, initial guess
+            trials: int, number guesses
             tolerance=1e-12: tolerance for closesness to zero
 
         Returns:
             float, better guess for segment length
         """
 
-        # add random number to guess
-        guesses = [guess + (random() - 0.5) * 0.01 for _ in range(5)]
+        # add random number to guess for several starting guesses
+        guesses = [guess + (random() - 0.5) * 0.01 for _ in range(trials)]
 
         # get roots
         roots = []
@@ -228,18 +229,12 @@ class Historian(list):
             # add to roots
             roots.append(guess)
 
-        print(roots)
-
-        # whittle down to real numbers
+        # whittle down to real numbers += 10 (should cover to 3pi)
         roots = [root for root in roots if numpy.isfinite(root)]
         roots = [root for root in roots if abs(root) < 10]
 
-        print(roots)
-
-        # average remaining
+        # average remaining for final value
         root = numpy.average(roots)
-
-        print(root)
 
         return root
 
