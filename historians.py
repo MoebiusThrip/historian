@@ -93,6 +93,7 @@ class Historian(list):
         self.quantile = None
         self.zero = None
         self.slope = None
+        self.guess = None
         self.coda = None
         self.inverse = None
         self.zeroii = None
@@ -201,21 +202,46 @@ class Historian(list):
             float, better guess for segment length
         """
 
-        # evaluate the function
-        evaluation = zero(guess, quantile)
-        derivative = slope(guess, quantile)
+        # add random number to guess
+        guesses = [guess + (random() - 0.5) * 0.01 for _ in range(5)]
 
-        # while the function evaluates to outside the tolerance
-        while abs(evaluation) > tolerance:
+        # get roots
+        roots = []
 
-            # adjust using newton's formula
-            guess = guess - evaluation / derivative
+        # for each guess
+        for guess in guesses:
 
             # evaluate the function
             evaluation = zero(guess, quantile)
             derivative = slope(guess, quantile)
 
-        return guess
+            # while the function evaluates to outside the tolerance
+            while abs(evaluation) > tolerance:
+
+                # adjust using newton's formula
+                guess = guess - evaluation / derivative
+
+                # evaluate the function
+                evaluation = zero(guess, quantile)
+                derivative = slope(guess, quantile)
+
+            # add to roots
+            roots.append(guess)
+
+        print(roots)
+
+        # whittle down to real numbers
+        roots = [root for root in roots if numpy.isfinite(root)]
+        roots = [root for root in roots if abs(root) < 10]
+
+        print(roots)
+
+        # average remaining
+        root = numpy.average(roots)
+
+        print(root)
+
+        return root
 
     def _cross(self, horizontal, point, pointii):
         """Determine the vertical height at a horizontal between two points.
@@ -288,6 +314,9 @@ class Historian(list):
             self.zeroii = lambda t, x: t - x
             self.slopeii = lambda t, x: 1
 
+            # set guess
+            self.guess = 1.0
+
         # define cycloid distribution functions
         if self.mode == 'cycloid':
 
@@ -296,15 +325,18 @@ class Historian(list):
             self.quantile = lambda t: (1 / pi) * ((t - pi) / 2 + (-sin(2 * t) / 4))
 
             # prepare functions for newton-rhapson
-            self.zero = lambda t, q: (1 / pi) * ((1 / 2) - sin(2 * t) / 4 - pi / 2) - q
-            self.slope = lambda t, q: (1 / pi) * (-cos(2 * t) / 4)
+            self.zero = lambda t, q: (1 / pi) * ((t - pi) / 2 + (-sin(2 * t) / 4)) - q
+            self.slope = lambda t, q: (1 / pi) * ((1 / 2) + (-cos(2 * t) / 2))
 
             # add coda
-            self.coda = lambda t: (4/ 25) * (t - sin(t))
+            self.coda = lambda t: (4 / 25) * (t - sin(t))
 
             # add coda newton parameterrs
             self.zeroii = lambda t, x: (4 / 25) * (t - sin(t)) - x
             self.slopeii = lambda t, x: (4 / 25) * (1 - cos(t))
+
+            # set guess
+            self.guess = 1.0
 
         return None
 
@@ -478,7 +510,8 @@ class Historian(list):
 
             # measure the length of the leg and apply distribution
             length = self._measure(member[-1], member[-2])
-            weight = self.distribution(length)
+            coda = self._crank(length, self.zeroii, self.slopeii)
+            weight = self.distribution(coda)
 
         return weight
 
@@ -779,14 +812,24 @@ class Historian(list):
             if index % 10 == 0:
 
                 # print status
-                print('calculating quantile {} of {}'.format(index, len(quantiles)))
+                print('calculating quantile {}, {} of {}'.format(quantile, index, len(quantiles)))
 
             # calculate length and make a string
-            length = self._crank(quantile, self.zero, self.slope, guess=1.0, tolerance=tolerance)
+            length = self._crank(quantile, self.zero, self.slope, guess=self.guess, tolerance=tolerance)
+            length = self.coda(length)
             lengths.append(length)
 
         # store lengths indexed by 10^precision * quantile
         self._dump(lengths, 'tables/table_{}.json'.format(self.mode))
+
+        # print table
+        pyplot.clf()
+
+        # plot table
+        indices = [index for index, _ in enumerate(lengths)]
+        pyplot.plot(indices, lengths, 'g--')
+        pyplot.savefig('verifications/table_{}'.format(self.mode))
+        pyplot.clf()
 
         return None
 
@@ -812,7 +855,12 @@ class Historian(list):
         # calculate distribution function
         chunk = 0.01
         horizontals = [number * chunk + 0.5 for number in range(101)]
-        distributions = numpy.array([self.distribution(horizontal) for horizontal in horizontals])
+
+        # convert to parameterization
+        parameterization = [self._crank(horizontal, self.zeroii, self.slopeii) for horizontal in horizontals]
+
+        # calculate distribution
+        distributions = numpy.array([self.distribution(horizontal) for horizontal in parameterization])
 
         # start plot
         pyplot.clf()
