@@ -940,6 +940,9 @@ class Historian(list):
         pyplot.gca().set_xticks([])
         pyplot.gca().set_yticks([])
 
+        print(dir(pyplot.gca().yaxis))
+        print(pyplot.gca().yaxis.get_scale())
+
         # save
         deposit = 'experiments/{}_{}_{}.png'.format(self.directory.split('/')[-1], len(self), resolution)
         pyplot.savefig(deposit)
