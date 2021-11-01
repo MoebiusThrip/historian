@@ -274,20 +274,19 @@ class Historian(list):
         if self.mode == 'sin2':
 
             # define probability distribution functions
-            self.distribution = lambda x:  2 * cos(pi * x) ** 2
-            self.quantile = lambda x: x - 0.5 + sin(2 * pi * x) / (2 * pi)
+            self.distribution = lambda t:  2 * cos(pi * t) ** 2
+            self.quantile = lambda t: t - 0.5 + sin(2 * pi * t) / (2 * pi)
 
             # prepare functions for newton-rhapson
-            self.zero = lambda x, q: x - q - 0.5 + sin(2 * pi * x) / (2 * pi)
-            self.slope = lambda x, q: 1 + cos(2 * pi * x)
+            self.zero = lambda t, q: t - q - 0.5 + sin(2 * pi * t) / (2 * pi)
+            self.slope = lambda t, q: 1 + cos(2 * pi * t)
 
             # add coda
-            self.coda = lambda x: x
-            self.inverse = lambda x: x
+            self.coda = lambda t: t
 
             # add newtton rhpapson parameters
-            self.zeroii = lambda x: x
-            self.slopeii = lambda x: x
+            self.zeroii = lambda t, x: t - x
+            self.slopeii = lambda t, x: 1
 
         # define cycloid distribution functions
         if self.mode == 'cycloid':
@@ -302,11 +301,10 @@ class Historian(list):
 
             # add coda
             self.coda = lambda t: (4/ 25) * (t - sin(t))
-            self.inverse = lambda x: x
 
             # add coda newton parameterrs
-            self.zeroii = lambda x, q: (4 / 25) * (x - sin(x)) - q
-            self.slopeii = lambda x, q: (4 / 25) * (1 - cos(x))
+            self.zeroii = lambda t, x: (4 / 25) * (t - sin(t)) - x
+            self.slopeii = lambda t, x: (4 / 25) * (1 - cos(t))
 
         return None
 
