@@ -954,11 +954,11 @@ class Historian(list):
         return
 
 
-# set up main function to run from command line
-if __name__ == '__main__':
+# grab potential arguments
+arguments = [argument for argument in sys.argv[1:]]
 
-    # grab arguments
-    arguments = [argument for argument in sys.argv[1:]]
+# if there ae arguments
+if len(arguments) > 0:
 
     # create instance
     historian = Historian(*arguments)
