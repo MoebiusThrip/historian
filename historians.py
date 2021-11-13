@@ -505,7 +505,7 @@ class Historian(list):
 
             # measure the length of the leg and apply distribution
             length = self._measure(member[-1], member[-2])
-            coda = self._crank(length, self.zeroii, self.slopeii)
+            coda = self._crank(length, self.zeroii, self.slopeii, guess=2 * pi)
             weight = self.distribution(coda)
 
         return weight
