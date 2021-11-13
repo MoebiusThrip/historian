@@ -309,8 +309,9 @@ class Historian(list):
             self.zeroii = lambda t, x: t - x
             self.slopeii = lambda t, x: 1
 
-            # set guess
+            # set guesses
             self.guess = 1.0
+            self.guessii = 1.0
 
         # define cycloid distribution functions
         if self.mode == 'cycloid':
@@ -332,6 +333,7 @@ class Historian(list):
 
             # set guess
             self.guess = 1.0
+            self.guessii = 2 * pi
 
         return None
 
@@ -505,7 +507,7 @@ class Historian(list):
 
             # measure the length of the leg and apply distribution
             length = self._measure(member[-1], member[-2])
-            coda = self._crank(length, self.zeroii, self.slopeii, guess=2 * pi)
+            coda = self._crank(length, self.zeroii, self.slopeii, self.guessii)
             weight = self.distribution(coda)
 
         return weight
