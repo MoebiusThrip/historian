@@ -716,6 +716,11 @@ class Historian(list):
                 # cut detections off at the screen
                 if len(detections) > 0:
 
+                    if detections.shape[0] > 1:
+                        print(detections.shape)
+                        print(len(self))
+                        print(' ')
+
                     # determine cutoff point and append
                     detections[:, -1] = numpy.array([self.screen, self._cross(self.screen, detections[:, -2], detections[:, -1])])
                     [self.append(history) for history in detections]
