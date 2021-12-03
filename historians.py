@@ -251,7 +251,7 @@ class Historian(list):
         """
 
         # calculate height
-        height = point[0][1] * (pointii[0][0] - horizontal) + pointii[0][1] * (horizontal - point[0][0]) / (pointii[0][0] - point[0][0])
+        height = point[:][1] * (pointii[0][0] - horizontal) + pointii[:][1] * (horizontal - point[:][0]) / (pointii[:][0] - point[:][0])
 
         return height
 
