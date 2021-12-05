@@ -251,7 +251,10 @@ class Historian(list):
         """
 
         # calculate height
-        height = point[:][1] * (pointii[0][0] - horizontal) + pointii[:][1] * (horizontal - point[:][0]) / (pointii[:][0] - point[:][0])
+        #height = point[:][1] * (pointii[:][0] - horizontal) + pointii[:][1] * (horizontal - point[:][0]) / (pointii[:][0] - point[:][0])
+
+        # calculate height
+        height = point[:, 1] + (horizontal - point[:, 0]) * (pointii[:, 1] - point[:, 1]) / (pointii[:, 0] - point[:, 0])
 
         return height
 
@@ -507,17 +510,8 @@ class Historian(list):
 
             # measure the length of the leg and apply distribution
             length = self._measure(member[-1], member[-2])
-
-            print('')
-            print(length)
-
             coda = self._crank(length, self.zeroii, self.slopeii, self.guessii)
-
-            print(coda)
-
             weight = self.distribution(coda)
-
-            print(weight)
 
         return weight
 
@@ -716,13 +710,9 @@ class Historian(list):
                 # cut detections off at the screen
                 if len(detections) > 0:
 
-                    if detections.shape[0] > 1:
-                        print(detections.shape)
-                        print(len(self))
-                        print(' ')
-
                     # determine cutoff point and append
-                    detections[:, -1] = numpy.array([self.screen, self._cross(self.screen, detections[:, -2], detections[:, -1])])
+                    heights = self._cross(self.screen, detections[:, -2], detections[:, -1])
+                    detections[:, -1] = numpy.array([[self.screen, height] for height in heights])
                     [self.append(history) for history in detections]
 
                 # find those that span the divider and remove them
