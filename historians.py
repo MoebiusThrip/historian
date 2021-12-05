@@ -250,7 +250,7 @@ class Historian(list):
             float
         """
 
-        # calculate height
+        # calculate height (mistaken)
         #height = point[:][1] * (pointii[:][0] - horizontal) + pointii[:][1] * (horizontal - point[:][0]) / (pointii[:][0] - point[:][0])
 
         # calculate height
