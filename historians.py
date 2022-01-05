@@ -450,6 +450,61 @@ class Historian(list):
 
         return length
 
+    def _splash(self, number=100000, steps=3):
+        """Plot a number of electrons.
+
+        Arguments:
+            number: int, number of electrons
+            steps: int, number of steps
+
+        Returns:
+            None
+        """
+
+        # open up tabulated values and convert to dict
+        table = self._load('tables/table_{}.json'.format(self.mode))
+        table = {index: entry for index, entry in enumerate(table)}
+
+        # begin graph
+        pyplot.clf()
+
+        # begin at source
+        source = (0, 0)
+        pyplot.plot([0], [0], color='black', marker=',')
+
+        # list colors
+        colors = ['black', 'blue', 'green']
+
+        # for each electron
+        for index in range(number):
+
+            # set first point
+            point = source
+
+            # for each step
+            for step, color in enumerate(colors[:steps]):
+
+                # create set of random angles for quantum paths
+                angle = numpy.random.random() * 2 * pi
+
+                # get lengths from table
+                length = table[numpy.random.randint(1000)]
+
+                # calculate new point
+                horizontal = point[0] + length * cos(angle)
+                vertical = point[1] + length * sin(angle)
+
+                # plot
+                pyplot.plot([horizontal], [vertical], color, marker=',')
+
+                # reset point
+                point = (horizontal, vertical)
+
+        # savefig
+        pyplot.savefig('splash/splash.png')
+
+        return None
+
     def _stamp(self, message):
         """Start timing a block of code, and print results with a message.
 
@@ -675,7 +730,7 @@ class Historian(list):
                 # recount number of surviving electrons
                 survivors = len(electrons)
 
-                # create set of random angles for qantum paths
+                # create set of random angles for quantum paths
                 angles = rand(survivors) * 2 * pi
 
                 # create set of random ints
