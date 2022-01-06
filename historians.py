@@ -450,12 +450,13 @@ class Historian(list):
 
         return length
 
-    def _splash(self, number=100000, steps=3):
+    def _splash(self, number=100000, steps=10, everything=True):
         """Plot a number of electrons.
 
         Arguments:
             number: int, number of electrons
             steps: int, number of steps
+            everything: boolean, plot everything?
 
         Returns:
             None
@@ -473,7 +474,7 @@ class Historian(list):
         pyplot.plot([0], [0], color='black', marker=',')
 
         # list colors
-        colors = ['black', 'blue', 'green']
+        colors = ['black', 'blue', 'green'] * steps
 
         # for each electron
         for index in range(number):
@@ -494,8 +495,11 @@ class Historian(list):
                 horizontal = point[0] + length * cos(angle)
                 vertical = point[1] + length * sin(angle)
 
-                # plot
-                pyplot.plot([horizontal], [vertical], color, marker=',')
+                # if step condition
+                if step == steps - 1 or everything:
+
+                    # plot
+                    pyplot.plot([horizontal], [vertical], color, marker=',')
 
                 # reset point
                 point = (horizontal, vertical)
