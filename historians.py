@@ -492,7 +492,8 @@ class Historian(list):
                 length = table[numpy.random.randint(1000)]
 
                 # calculate new point
-                horizontal = point[0] + length * cos(angle)
+                velocity = 0.1
+                horizontal = point[0] + velocity + length * cos(angle)
                 vertical = point[1] + length * sin(angle)
 
                 # if step condition
