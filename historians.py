@@ -1014,6 +1014,57 @@ class Historian(list):
 
         return
 
+    def waver(self, number=100000, steps=10000):
+        """Test fundamental hypothesis in 1-D.
+
+        Arguments:
+            number: int, number of electrons
+            steps: int, number of steps
+
+        Returns:
+            None
+        """
+
+        # open up tabulated values and convert to dict
+        table = self._load('tables/table_{}.json'.format(self.mode))
+        table = {index: entry for index, entry in enumerate(table)}
+
+        # allocate matrix, allowing extra entry for initial point
+        matrix = numpy.zeros((number, steps + 1))
+
+        # for each step
+        for step in range(steps):
+
+            # get random table indices and pull lengths
+            indices = randint(1001, size=(number,))
+            lengths = numpy.array([table[index] for index in indices])
+
+            # get random signs
+            signs = numpy.sign(numpy.random.rand(number) - 0.5)
+
+            # create additions
+            additions = lengths * signs
+            matrix[:, step + 1] = matrix[:, step] + additions
+
+        # plot final points
+        pyplot.clf()
+
+        # get points
+        horizontals = matrix[:, -1] - matrix[:, -1].astype(int)
+        verticals = list(range(number))
+
+        # set horizontal
+        pyplot.xlim(-1.2, 1.2)
+
+        # plot
+        pyplot.plot(horizontals, verticals, 'g,')
+
+        # save
+        pyplot.savefig('waver/testo.png')
+        pyplot.clf()
+
+        return matrix
+
 
 # grab potential arguments
 arguments = [argument for argument in sys.argv[1:]]
