@@ -11,6 +11,7 @@ from time import time, sleep
 from math import sin, cos, pi, exp, log
 
 # import numpy
+import math
 import numpy
 from numpy.random import random, rand, randint
 from numpy import sin, cos, pi, exp, log, sqrt
@@ -25,7 +26,7 @@ Style.use('fast')
 
 
 # play racquetball
-def racquet(steps=100, frequency=1.0, left=0.0, right=20.0, teleportation=10.0):
+def racquet(steps=10000, frequency=2.0, left=0.0, right=20.0, teleportation=10.0):
     """Simulate a session of quantum racquetball.
 
     Arguments:
@@ -136,5 +137,27 @@ def racquet(steps=100, frequency=1.0, left=0.0, right=20.0, teleportation=10.0):
 
     # saveplot
     pyplot.savefig('racquetball.png')
+
+    # make histogram
+    chunks = 1000
+    size = (right - left) / chunks
+    bins = [(right + (size * index), right + size + (size * index)) for index in range(chunks)]
+
+    # got through each segment
+    histogram = []
+    for segment in segments:
+
+        # only reals
+        if not segment[2]:
+
+            # determine number of bins
+            number = (segment[0] - segment[1]) / size
+            sign = numpy.sign((segment[0] - segment[1]))
+            histogram += [segment[0] + index * size * sign for index in range(int(abs(number)))]
+
+    # make histogram
+    pyplot.clf()
+    pyplot.hist(histogram, bins=100)
+    pyplot.savefig('histogram.png')
 
     return None
