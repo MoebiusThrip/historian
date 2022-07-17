@@ -1,0 +1,3 @@
+POV: You are playing a high stakes game of racquetball in space with a space ghost.  The court is 20m long.  You strike the ball with your racquet, and it continues to bounce back and forth between both walls at constant speed.  At random but frequent intervals, the space ghost instantaneously teleports with the ball exactly 10m in either direction.  However, she cannot teleport through the wall, but bounces off as well, going the other way for the remainder.  At some moment unbeknownst to you, a photo is taken of the game.  You stand to gain a lot of cash if you can guess where the ball will be.  You get two bets; where will you place them?
+
+
